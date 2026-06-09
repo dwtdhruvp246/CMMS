@@ -1452,13 +1452,13 @@
 
     async function loadDashboard() {
       const today = new Date().toISOString().split('T')[0];
-      const { count: openCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true }).eq('status', 'open');
-      const { count: progressCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true }).eq('status', 'in_progress');
-      const { count: pendingCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true }).eq('status', 'pending_approval');
+      const { count: stoppedCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true }).eq('status', 'machine_stopped');
+      const { count: runningCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true }).eq('status', 'machine_running');
+      const { count: totalCount } = await supabase.from('breakdowns').select('*', { count: 'exact', head: true });
       const { count: schedCount } = await supabase.from('scheduled_maintenance').select('*', { count: 'exact', head: true }).gte('date', today);
-      document.getElementById('tally-open').textContent = openCount || 0;
-      document.getElementById('tally-in-progress').textContent = progressCount || 0;
-      document.getElementById('tally-pending').textContent = pendingCount || 0;
+      document.getElementById('tally-stopped').textContent = stoppedCount || 0;
+      document.getElementById('tally-running').textContent = runningCount || 0;
+      document.getElementById('tally-total').textContent = totalCount || 0;
       document.getElementById('tally-scheduled').textContent = schedCount || 0;
 
       const { data: upcoming } = await supabase.from('scheduled_maintenance').select('*, machines(name)').gte('date', today).order('date', { ascending: true }).limit(5);
@@ -1474,7 +1474,7 @@
       if (!recent || recent.length === 0) {
         recList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>No recent breakdowns.</p></div>';
       } else {
-        recList.innerHTML = recent.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown fault'}</div></div><div class="badge badge-${b.status}">${b.status.replace('_', ' ')}</div></div>`).join('');
+        recList.innerHTML = recent.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown fault'}</div></div><div class="badge badge-${b.status}">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Running'}</div></div>`).join('');
       }
     }
 
@@ -1494,7 +1494,7 @@
         if (!breakdowns || breakdowns.length === 0) {
           bList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>No breakdowns on your machines.</p></div>';
         } else {
-          bList.innerHTML = breakdowns.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown'}</div></div><div class="badge badge-${b.status}">${b.status.replace('_', ' ')}</div></div>`).join('');
+          bList.innerHTML = breakdowns.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown'}</div></div><div class="badge badge-${b.status}">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</div></div>`).join('');
         }
         const { data: maintenance } = await supabase.from('scheduled_maintenance').select('*, machines(name)').in('machine_id', machineIds).gte('date', new Date().toISOString().split('T')[0]).order('date', { ascending: true });
         const mList = document.getElementById('my-maintenance-list');
@@ -1520,7 +1520,7 @@
       } else {
         table.classList.remove('hidden');
         empty.classList.add('hidden');
-        tbody.innerHTML = breakdowns.map(b => `<tr><td>${b.machines?.name || 'N/A'}</td><td>${b.description}</td><td>${b.fault_types?.name || 'N/A'}</td><td>${b.downtime_impacts?.name || 'N/A'}</td><td>${b.priorities?.name || 'N/A'}</td><td><span class="badge badge-${b.status}">${b.status.replace('_', ' ')}</span></td><td>${new Date(b.created_at).toLocaleDateString()}</td><td>${canEdit('breakdowns') ? `<button class="btn btn-soft btn-xs" onclick="editBreakdown('${b.id}')">Edit</button>` : ''}${canDelete('breakdowns') ? `<button class="btn btn-danger btn-xs" onclick="deleteBreakdown('${b.id}')">Delete</button>` : ''}</td></tr>`).join('');
+        tbody.innerHTML = breakdowns.map(b => `<tr><td>${b.machines?.name || 'N/A'}</td><td>${b.description}</td><td>${b.fault_types?.name || 'N/A'}</td><td>${b.downtime_impacts?.name || 'N/A'}</td><td>${b.priorities?.name || 'N/A'}</td><td><span class="badge badge-${b.status}">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</span></td><td>${new Date(b.created_at).toLocaleDateString()}</td><td>${canEdit('breakdowns') ? `<button class="btn btn-soft btn-xs" onclick="editBreakdown('${b.id}')">Edit</button>` : ''}${canDelete('breakdowns') ? `<button class="btn btn-danger btn-xs" onclick="deleteBreakdown('${b.id}')">Delete</button>` : ''}</td></tr>`).join('');
       }
     }
 
@@ -1760,7 +1760,7 @@
       if (!breakdowns || breakdowns.length === 0) {
         rows = '<tr><td colspan="7" style="text-align:center; padding:20px;">No data found for selected filters.</td></tr>';
       } else {
-        rows = breakdowns.map(b => `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px;">${b.machines?.name || 'N/A'}</td><td style="padding:10px;">${b.description}</td><td style="padding:10px;">${b.fault_types?.name || 'N/A'}</td><td style="padding:10px;">${b.downtime_impacts?.name || 'N/A'}</td><td style="padding:10px;">${b.priorities?.name || 'N/A'}</td><td style="padding:10px;">${b.status.replace('_', ' ')}</td><td style="padding:10px;">${new Date(b.created_at).toLocaleDateString()}</td></tr>`).join('');
+        rows = breakdowns.map(b => `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px;">${b.machines?.name || 'N/A'}</td><td style="padding:10px;">${b.description}</td><td style="padding:10px;">${b.fault_types?.name || 'N/A'}</td><td style="padding:10px;">${b.downtime_impacts?.name || 'N/A'}</td><td style="padding:10px;">${b.priorities?.name || 'N/A'}</td><td style="padding:10px;">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</td><td style="padding:10px;">${new Date(b.created_at).toLocaleDateString()}</td></tr>`).join('');
       }
       document.getElementById('report-content').innerHTML = `<div style="margin-bottom:20px; padding:15px; background:#f8f9fa; border-radius:8px;"><strong>Filters:</strong> From: ${from || 'All'} | To: ${to || 'All'} | Machine: ${machineId ? breakdowns?.[0]?.machines?.name || 'Selected' : 'All'} | Status: ${status || 'All'}</div><table style="width:100%; border-collapse:collapse; font-size:14px;"><thead style="background:#1a1a2e; color:white;"><tr><th style="padding:12px; text-align:left;">Machine</th><th style="padding:12px; text-align:left;">Description</th><th style="padding:12px; text-align:left;">Fault Type</th><th style="padding:12px; text-align:left;">Impact</th><th style="padding:12px; text-align:left;">Priority</th><th style="padding:12px; text-align:left;">Status</th><th style="padding:12px; text-align:left;">Date</th></tr></thead><tbody>${rows}</tbody></table>`;
       reportDiv.classList.add('active');
