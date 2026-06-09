@@ -65,7 +65,7 @@
       font-size: 14px;
       cursor: pointer;
       transition: var(--transition);
-      color: white;
+      color: #111111;
       position: relative;
       overflow: hidden;
     }
@@ -76,11 +76,13 @@
     }
     .btn-soft:hover {
       transform: translateY(-2px);
-      box-shadow: 8px 8px 16px rgba(0,0,0,0.3), -8px -8px 16px rgba(255,255,255,0.08);
+      box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.4);
+      color: #111111;
     }
     .btn-soft:active {
       transform: translateY(0);
-      box-shadow: inset 4px 4px 8px rgba(0,0,0,0.2), inset -4px -4px 8px rgba(255,255,255,0.05);
+      box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1), inset -4px -4px 8px rgba(255,255,255,0.2);
+      color: #111111;
     }
     .btn-primary {
       background: linear-gradient(145deg, #64B5F6, #42A5F5);
@@ -90,6 +92,7 @@
     }
     .btn-primary:hover {
       box-shadow: 8px 8px 20px rgba(0,0,0,0.15), -8px -8px 20px rgba(100,181,246,0.25);
+      color: #111111;
       filter: brightness(1.1);
     }
     .btn-danger {
@@ -100,7 +103,6 @@
     }
     .btn-success {
       background: linear-gradient(145deg, #81C784, #66BB6A);
-      color: #111111;
       box-shadow: 6px 6px 12px rgba(0,0,0,0.15), -6px -6px 12px rgba(129,199,132,0.2);
       border: 1px solid rgba(102,187,106,0.4);
     }
