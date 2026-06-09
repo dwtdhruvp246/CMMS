@@ -1401,7 +1401,8 @@
       document.getElementById('user-avatar').textContent = (currentUser.full_name || currentUser.username || 'U').charAt(0).toUpperCase();
       document.getElementById('dash-username').textContent = currentUser.full_name || currentUser.username;
       renderSidebar();
-      navigateTo('dashboard');
+      const landing = currentUser.roles?.landing_page || 'dashboard';
+      navigateTo(landing);
     }
 
     function canView(module) { return !!currentPermissions[module]?.view; }
@@ -1993,11 +1994,12 @@
     }
 
     async function openAddRoleModal() {
-      const html = `<div class="form-group"><label class="form-label">Role Name</label><input type="text" class="form-input" id="role-name" placeholder="e.g., Supervisor"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="role-desc" placeholder="Describe the role..."></textarea></div>`;
+      const pageOpts = '<option value="dashboard">Dashboard</option><option value="my-machines">My Machines</option><option value="breakdowns">Breakdowns</option><option value="scheduled-maintenance">Scheduled Maintenance</option><option value="machinery">Machinery</option><option value="reports">Reports</option><option value="settings">Settings</option><option value="users-permissions">Users & Permissions</option>';
+      const html = `<div class="form-group"><label class="form-label">Role Name</label><input type="text" class="form-input" id="role-name" placeholder="e.g., Supervisor"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="role-desc" placeholder="Describe the role..."></textarea></div><div class="form-group"><label class="form-label">Landing Page</label><select class="form-select" id="role-landing">${pageOpts}</select></div><p style="font-size:12px; color:var(--text-muted); margin-top:4px;">This is the first page users with this role will see after logging in.</p>`;
       openModal('Add Role', html, async () => {
         const name = document.getElementById('role-name').value.trim();
         if (!name) { showToast('Role name is required', 'error'); return; }
-        const { data, error } = await supabase.from('roles').insert({ name, description: document.getElementById('role-desc').value.trim() }).select('id').single();
+        const { data, error } = await supabase.from('roles').insert({ name, description: document.getElementById('role-desc').value.trim(), landing_page: document.getElementById('role-landing').value }).select('id').single();
         if (error) { showToast(error.message, 'error'); return; }
         const modules = Object.values(MODULES);
         const permInserts = modules.map(m => ({ role_id: data.id, module: m, can_view: false, can_edit: false, can_delete: false }));
@@ -2010,9 +2012,23 @@
     async function editRole(id) {
       const { data: r } = await supabase.from('roles').select('*').eq('id', id).single();
       if (!r) return;
-      const html = `<div class="form-group"><label class="form-label">Role Name</label><input type="text" class="form-input" id="role-name" value="${r.name}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="role-desc">${r.description || ''}</textarea></div>`;
+      const pages = [
+        { id: 'dashboard', label: 'Dashboard' },
+        { id: 'my-machines', label: 'My Machines' },
+        { id: 'breakdowns', label: 'Breakdowns' },
+        { id: 'scheduled-maintenance', label: 'Scheduled Maintenance' },
+        { id: 'machinery', label: 'Machinery' },
+        { id: 'reports', label: 'Reports' },
+        { id: 'settings', label: 'Settings' },
+        { id: 'users-permissions', label: 'Users & Permissions' }
+      ];
+      let pageOpts = '';
+      pages.forEach(p => {
+        pageOpts += `<option value="${p.id}" ${r.landing_page === p.id ? 'selected' : ''}>${p.label}</option>`;
+      });
+      const html = `<div class="form-group"><label class="form-label">Role Name</label><input type="text" class="form-input" id="role-name" value="${r.name}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="role-desc">${r.description || ''}</textarea></div><div class="form-group"><label class="form-label">Landing Page</label><select class="form-select" id="role-landing">${pageOpts}</select></div><p style="font-size:12px; color:var(--text-muted); margin-top:4px;">This is the first page users with this role will see after logging in.</p>`;
       openModal('Edit Role', html, async () => {
-        const { error } = await supabase.from('roles').update({ name: document.getElementById('role-name').value.trim(), description: document.getElementById('role-desc').value.trim() }).eq('id', id);
+        const { error } = await supabase.from('roles').update({ name: document.getElementById('role-name').value.trim(), description: document.getElementById('role-desc').value.trim(), landing_page: document.getElementById('role-landing').value }).eq('id', id);
         if (error) { showToast(error.message, 'error'); return; }
         showToast('Role updated', 'success');
         loadRolesTab();
