@@ -173,10 +173,10 @@
       font-weight: 600;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .badge-open { background: rgba(183,28,28,0.1); color: #B71C1C; }
-    .badge-in_progress { background: rgba(230,81,0,0.1); color: var(--warning); }
-    .badge-pending_approval { background: rgba(13,71,161,0.1); color: var(--info); }
-    .badge-closed { background: rgba(27,94,32,0.1); color: var(--success); }
+    .badge-machine_stopped { background: rgba(183,28,28,0.1); color: #B71C1C; }
+    .badge-machine_running { background: rgba(230,81,0,0.1); color: var(--warning); }
+
+
     .badge-scheduled { background: rgba(21,101,192,0.1); color: #1565C0; }
     .badge-completed { background: rgba(27,94,32,0.1); color: var(--success); }
     .bento-grid {
@@ -237,27 +237,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .bento-hero {
-      grid-column: span 2;
-      grid-row: span 2;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .bento-hero .hero-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #111111, #333333);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .bento-hero .hero-subtitle {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      text-shadow: none;
-    }
+    /* bento-hero removed — welcome moved to page header */
     .sidebar {
       width: 280px;
       height: 100vh;
@@ -740,7 +720,6 @@
     .sidebar-overlay.active { display: block; }
     @media (max-width: 1024px) {
       .bento-grid { grid-template-columns: repeat(2, 1fr); }
-      .bento-hero { grid-column: span 2; grid-row: span 1; }
     }
     @media (max-width: 768px) {
       .mobile-toggle { display: flex; align-items: center; justify-content: center; }
@@ -748,7 +727,7 @@
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 80px 16px 24px; }
       .bento-grid { grid-template-columns: 1fr; }
-      .bento-hero { grid-column: span 1; }
+      
       .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
       .login-card { padding: 32px 24px; }
       .modal-container { padding: 24px; }
@@ -864,36 +843,29 @@
             <div class="page-title">Dashboard</div>
             <div class="page-subtitle">Overview of your maintenance operations</div>
           </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px; font-weight:600; color:#111111;">Welcome back, <span id="dash-username">User</span></div>
+            <div style="font-size:13px; color:#666666;">Here is your maintenance overview</div>
+          </div>
         </div>
         <div class="bento-grid">
-          <div class="bento-card bento-hero">
-            <div>
-              <div class="hero-title">Welcome back, <span id="dash-username">User</span></div>
-              <div class="hero-subtitle">Here is the real-time status of your maintenance workflow. Keep track of open issues, scheduled tasks, and recent breakdowns all in one place.</div>
-            </div>
-            <div style="margin-top: 24px;">
-              <button class="btn btn-primary" onclick="navigateTo('breakdowns')">
-                <span>🔧</span> View Breakdowns
-              </button>
-            </div>
+          <div class="bento-card">
+            <div class="card-icon" style="background: rgba(183,28,28,0.1); color: #B71C1C;">🛑</div>
+            <div class="card-value" id="tally-stopped">0</div>
+            <div class="card-label">Machine Stopped</div>
           </div>
           <div class="bento-card">
-            <div class="card-icon" style="background: rgba(255,71,87,0.15); color: #B71C1C;">⚠️</div>
-            <div class="card-value" id="tally-open">0</div>
-            <div class="card-label">Open Issues</div>
+            <div class="card-icon" style="background: rgba(230,81,0,0.1); color: #E65100;">⚙️</div>
+            <div class="card-value" id="tally-running">0</div>
+            <div class="card-label">Machine Still Running</div>
           </div>
           <div class="bento-card">
-            <div class="card-icon" style="background: rgba(255,170,0,0.15); color: var(--warning);">🔧</div>
-            <div class="card-value" id="tally-in-progress">0</div>
-            <div class="card-label">In Progress</div>
+            <div class="card-icon" style="background: rgba(21,101,192,0.1); color: #1565C0;">🔧</div>
+            <div class="card-value" id="tally-total">0</div>
+            <div class="card-label">Total Breakdowns</div>
           </div>
           <div class="bento-card">
-            <div class="card-icon" style="background: rgba(116,185,255,0.15); color: var(--info);">⏳</div>
-            <div class="card-value" id="tally-pending">0</div>
-            <div class="card-label">Pending Approval</div>
-          </div>
-          <div class="bento-card">
-            <div class="card-icon" style="background: rgba(0,255,136,0.15); color: var(--success);">📅</div>
+            <div class="card-icon" style="background: rgba(27,94,32,0.1); color: #1B5E20;">📅</div>
             <div class="card-value" id="tally-scheduled">0</div>
             <div class="card-label">Scheduled Maintenance</div>
           </div>
@@ -1069,10 +1041,8 @@
               <label class="form-label">Status</label>
               <select class="form-select" id="report-status">
                 <option value="">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="pending_approval">Pending Approval</option>
-                <option value="closed">Closed</option>
+                <option value="machine_stopped">Machine Stopped</option>
+                <option value="machine_running">Machine Still Running</option>
               </select>
             </div>
           </div>
@@ -1537,7 +1507,7 @@
       const faultOpts = await getFaultOptions();
       const impactOpts = await getImpactOptions();
       const priorityOpts = await getPriorityOptions();
-      const html = `<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="bd-machine">${machineOpts}</select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="bd-desc" placeholder="Describe the breakdown..."></textarea></div><div class="form-group"><label class="form-label">Fault Type</label><select class="form-select" id="bd-fault">${faultOpts}</select></div><div class="form-group"><label class="form-label">Downtime Impact</label><select class="form-select" id="bd-impact">${impactOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="bd-priority">${priorityOpts}</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="bd-status"><option value="open">Open</option><option value="in_progress">In Progress</option><option value="pending_approval">Pending Approval</option><option value="closed">Closed</option></select></div>`;
+      const html = `<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="bd-machine">${machineOpts}</select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="bd-desc" placeholder="Describe the breakdown..."></textarea></div><div class="form-group"><label class="form-label">Fault Type</label><select class="form-select" id="bd-fault">${faultOpts}</select></div><div class="form-group"><label class="form-label">Downtime Impact</label><select class="form-select" id="bd-impact">${impactOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="bd-priority">${priorityOpts}</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="bd-status"><option value="machine_stopped">Machine Stopped</option><option value="machine_running">Machine Still Running</option></select></div>`;
       openModal('Report Breakdown', html, async () => {
         const machineId = document.getElementById('bd-machine').value;
         const desc = document.getElementById('bd-desc').value.trim();
@@ -1562,7 +1532,7 @@
       const faultOpts = await getFaultOptions(b.fault_type_id);
       const impactOpts = await getImpactOptions(b.downtime_impact_id);
       const priorityOpts = await getPriorityOptions(b.priority_id);
-      const html = `<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="bd-machine">${machineOpts}</select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="bd-desc">${b.description}</textarea></div><div class="form-group"><label class="form-label">Fault Type</label><select class="form-select" id="bd-fault">${faultOpts}</select></div><div class="form-group"><label class="form-label">Downtime Impact</label><select class="form-select" id="bd-impact">${impactOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="bd-priority">${priorityOpts}</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="bd-status"><option value="open" ${b.status === 'open' ? 'selected' : ''}>Open</option><option value="in_progress" ${b.status === 'in_progress' ? 'selected' : ''}>In Progress</option><option value="pending_approval" ${b.status === 'pending_approval' ? 'selected' : ''}>Pending Approval</option><option value="closed" ${b.status === 'closed' ? 'selected' : ''}>Closed</option></select></div>`;
+      const html = `<div class="form-group"><label class="form-label">Machine</label><select class="form-select" id="bd-machine">${machineOpts}</select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="bd-desc">${b.description}</textarea></div><div class="form-group"><label class="form-label">Fault Type</label><select class="form-select" id="bd-fault">${faultOpts}</select></div><div class="form-group"><label class="form-label">Downtime Impact</label><select class="form-select" id="bd-impact">${impactOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="bd-priority">${priorityOpts}</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="bd-status"><option value="machine_stopped" ${b.status === 'machine_stopped' ? 'selected' : ''}>Machine Stopped</option><option value="machine_running" ${b.status === 'machine_running' ? 'selected' : ''}>Machine Still Running</option></select></div>`;
       openModal('Edit Breakdown', html, async () => {
         const { error } = await supabase.from('breakdowns').update({ machine_id: document.getElementById('bd-machine').value, description: document.getElementById('bd-desc').value.trim(), fault_type_id: document.getElementById('bd-fault').value || null, downtime_impact_id: document.getElementById('bd-impact').value || null, priority_id: document.getElementById('bd-priority').value || null, status: document.getElementById('bd-status').value }).eq('id', id);
         if (error) { showToast(error.message, 'error'); return; }
