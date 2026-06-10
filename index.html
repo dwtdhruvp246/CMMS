@@ -2499,7 +2499,14 @@
 
     async function acknowledgeBreakdown(id) {
       const { error } = await supabase.from('breakdown_approvals').insert({ breakdown_id: id, user_id: currentUser.id, type: 'acknowledge', remarks: null });
-      if (error) { showToast(error.message, 'error'); return; }
+      if (error) {
+        if (error.code === '409' || error.message.includes('duplicate')) {
+          showToast('You have already acknowledged this breakdown.', 'info');
+        } else {
+          showToast(error.message, 'error');
+        }
+        return;
+      }
       await supabase.from('breakdowns').update({ status: 'machine_running' }).eq('id', id);
       showToast('Breakdown acknowledged. Status updated to In Progress.', 'success');
       closeModal();
@@ -2509,7 +2516,14 @@
 
     async function attendBreakdown(id) {
       const { error } = await supabase.from('breakdown_approvals').insert({ breakdown_id: id, user_id: currentUser.id, type: 'attended', remarks: null });
-      if (error) { showToast(error.message, 'error'); return; }
+      if (error) {
+        if (error.code === '409' || error.message.includes('duplicate')) {
+          showToast('You have already marked this breakdown as attended.', 'info');
+        } else {
+          showToast(error.message, 'error');
+        }
+        return;
+      }
       showToast('Breakdown marked as attended. Now pending final approvals.', 'success');
       closeModal();
       loadBreakdownsPage();
@@ -2559,7 +2573,14 @@
     async function approveBreakdown(breakdownId, requiredIdsStr) {
       const remarks = document.getElementById('approval-remarks')?.value.trim() || '';
       const { error } = await supabase.from('breakdown_approvals').insert({ breakdown_id: breakdownId, user_id: currentUser.id, type: 'approve', remarks: remarks || null });
-      if (error) { showToast(error.message, 'error'); return; }
+      if (error) {
+        if (error.code === '409' || error.message.includes('duplicate')) {
+          showToast('You have already approved this breakdown.', 'info');
+        } else {
+          showToast(error.message, 'error');
+        }
+        return;
+      }
       showToast('Breakdown approved!', 'success');
       const requiredIds = requiredIdsStr.split(',').filter(id => id);
       const { data: allApprovals } = await supabase.from('breakdown_approvals').select('user_id, type').eq('breakdown_id', breakdownId);
