@@ -1947,7 +1947,10 @@
         const roleChecked = document.querySelectorAll('.fault-role-check:checked');
         const roleInserts = [];
         roleChecked.forEach(cb => roleInserts.push({ fault_type_id: newFault.id, role_id: cb.value }));
-        if (roleInserts.length > 0) await supabase.from('fault_type_roles').insert(roleInserts);
+        if (roleInserts.length > 0) {
+          const { error: roleErr } = await supabase.from('fault_type_roles').insert(roleInserts);
+          if (roleErr) { showToast('Fault type created but roles failed: ' + roleErr.message, 'error'); }
+        }
         showToast('Fault type added', 'success');
         loadFaultTypes();
       });
@@ -1989,7 +1992,10 @@
         const roleChecked = document.querySelectorAll('.fault-role-check:checked');
         const roleInserts = [];
         roleChecked.forEach(cb => roleInserts.push({ fault_type_id: id, role_id: cb.value }));
-        if (roleInserts.length > 0) await supabase.from('fault_type_roles').insert(roleInserts);
+        if (roleInserts.length > 0) {
+          const { error: roleErr } = await supabase.from('fault_type_roles').insert(roleInserts);
+          if (roleErr) { showToast('Fault type updated but roles failed: ' + roleErr.message, 'error'); return; }
+        }
         showToast('Fault type updated', 'success');
         loadFaultTypes();
       });
