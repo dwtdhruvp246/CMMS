@@ -1557,7 +1557,7 @@
           const requiredCount = requiredIds.length || 1;
           const stage = getBreakdownWorkflowStage(b, bdApprovals, requiredCount);
           const stageLabel = stage === 'open' ? 'Open' : stage === 'in_progress' ? 'In Progress' : stage === 'pending_approval' ? 'Pending Approval' : 'Closed';
-          return `<tr><td>${b.machines?.name || 'N/A'}</td><td>${b.description}</td><td>${b.fault_types?.name || 'N/A'}</td><td>${b.downtime_impacts?.name || 'N/A'}</td><td>${b.priorities?.name || 'N/A'}</td><td><span class="badge badge-${stage}\">${stageLabel}</span><div style=\"font-size:11px; color:#666; margin-top:2px;\">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</div></td><td>${new Date(b.created_at).toLocaleDateString()}</td><td><button class=\"btn btn-soft btn-xs\" onclick=\"viewBreakdown('${b.id}')\">👁️ View</button>${canEdit('breakdowns') ? `<button class=\"btn btn-soft btn-xs\" onclick=\"editBreakdown('${b.id}')\">Edit</button>` : ''}${canDelete('breakdowns') ? `<button class=\"btn btn-danger btn-xs\" onclick=\"deleteBreakdown('${b.id}')\">Delete</button>` : ''}</td></tr>`;
+          return `<tr><td>${b.machines?.name || 'N/A'}</td><td>${b.description}</td><td>${b.fault_types?.name || 'N/A'}</td><td>${b.downtime_impacts?.name || 'N/A'}</td><td>${b.priorities?.name || 'N/A'}</td><td><span class="badge badge-${stage}">${stageLabel}</span><div style="font-size:11px; color:#666; margin-top:2px;">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</div></td><td>${new Date(b.created_at).toLocaleDateString()}</td><td><button class="btn btn-soft btn-xs" onclick="viewBreakdown('${b.id}')">👁️ View</button>${canEdit('breakdowns') ? `<button class="btn btn-soft btn-xs" onclick="editBreakdown('${b.id}')">Edit</button>` : ''}${canDelete('breakdowns') ? `<button class="btn btn-danger btn-xs" onclick="deleteBreakdown('${b.id}')">Delete</button>` : ''}</td></tr>`;
         }));
         tbody.innerHTML = rows.join('');
       }
@@ -2386,7 +2386,7 @@
     }
 
     // ============================================
-    // VIEW & APPROVAL WORKFLOW
+    // VIEW & APPROVAL WORKFLOW (4 STAGES)
     // ============================================
     async function viewBreakdown(id) {
       const { data: b } = await supabase.from('breakdowns').select('*, machines(name), fault_types(name), downtime_impacts(name), priorities(name), users(full_name)').eq('id', id).single();
@@ -2395,29 +2395,31 @@
       const requiredCount = requiredIds.length || 1;
       const { data: approvals } = await supabase.from('breakdown_approvals').select('*, users(full_name)').eq('breakdown_id', id);
       const ack = (approvals || []).find(a => a.type === 'acknowledge');
+      const attended = (approvals || []).find(a => a.type === 'attended');
       const finalApprovals = (approvals || []).filter(a => a.type === 'approve');
       const approvedIds = new Set(finalApprovals.map(a => a.user_id));
       const stage = getBreakdownWorkflowStage(b, approvals || [], requiredCount);
       const stageLabel = stage === 'open' ? 'Open' : stage === 'in_progress' ? 'In Progress' : stage === 'pending_approval' ? 'Pending Approval' : 'Closed';
 
       const isRequired = requiredIds.includes(currentUser.id);
-      const canAcknowledge = !ack && isRequired && stage === 'open';
-      const canApprove = ack && !approvedIds.has(currentUser.id) && isRequired && stage !== 'closed';
+      const canAcknowledge = isRequired && stage === 'open';
+      const canAttend = isRequired && stage === 'in_progress';
+      const canApprove = isRequired && stage === 'pending_approval' && !approvedIds.has(currentUser.id);
 
       let actionsHtml = '';
       if (canAcknowledge) {
-        actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="acknowledgeBreakdown('${id}')"><span>✋</span> Acknowledge Breakdown</button>`;
-      } else if (!isRequired && !ack) {
+        actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="acknowledgeBreakdown('${id}')"><span>✋</span> Acknowledge / Attending</button>`;
+      } else if (canAttend) {
+        actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="attendBreakdown('${id}')"><span>🔧</span> Breakdown Attended</button>`;
+      } else if (canApprove) {
+        actionsHtml += `<div class="form-group"><label class="form-label">Approval Remarks (optional)</label><textarea class="form-textarea" id="approval-remarks" placeholder="Add remarks about this approval..."></textarea></div><button class="btn btn-success w-full" onclick="approveBreakdown('${id}', '${requiredIds.join(',')}')"><span>✅</span> Approve Breakdown</button>`;
+      } else if (!isRequired && stage !== 'closed') {
         actionsHtml += `<div style="padding:12px; background:rgba(255,170,0,0.08); border-radius:10px; text-align:center;"><span style="color:#E65100; font-weight:600;">⏳ You are not authorized to approve this breakdown.</span></div>`;
-      }
-
-      if (canApprove) {
-        actionsHtml += `<div class="form-group"><label class="form-label">Approval Remarks (optional)</label><textarea class="form-textarea" id="approval-remarks" placeholder="Add remarks about this approval..."></textarea></div><button class="btn btn-success w-full" onclick="approveBreakdown('${id}', '${requiredIds.join(',')}')"><span>✅</span> Completed Breakdown Approval</button>`;
       } else if (approvedIds.has(currentUser.id)) {
         actionsHtml += `<div style="padding:12px; background:rgba(0,255,136,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ You have already approved this breakdown.</span></div>`;
       }
 
-      if (!actionsHtml && stage === 'closed') {
+      if (stage === 'closed') {
         actionsHtml = `<div style="padding:12px; background:rgba(0,255,136,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ This breakdown is closed. All managers have approved.</span></div>`;
       }
 
@@ -2429,9 +2431,12 @@
         approversHtml = '<div style="display:flex; flex-direction:column; gap:8px;">';
         (reqUsers || []).forEach(u => {
           const ackBy = ack?.user_id === u.id ? ack : null;
+          const attBy = attended?.user_id === u.id ? attended : null;
           const appBy = finalApprovals.find(a => a.user_id === u.id);
           if (appBy) {
             approversHtml += `<div style="padding:10px; background:rgba(0,255,136,0.08); border-radius:10px; border:1px solid rgba(0,255,136,0.2);"><div style="font-weight:600; color:#1B5E20;">✅ ${u.full_name}</div><div style="font-size:12px; color:#666;">Approved on ${new Date(appBy.approved_at).toLocaleString()}</div>${appBy.remarks ? `<div style="font-size:13px; margin-top:4px; font-style:italic; color:#333;">"${appBy.remarks}"</div>` : ''}</div>`;
+          } else if (attBy) {
+            approversHtml += `<div style="padding:10px; background:rgba(21,101,192,0.08); border-radius:10px; border:1px solid rgba(21,101,192,0.2);"><div style="font-weight:600; color:#1565C0;">🔧 ${u.full_name}</div><div style="font-size:12px; color:#666;">Marked attended on ${new Date(attBy.approved_at).toLocaleString()}</div></div>`;
           } else if (ackBy) {
             approversHtml += `<div style="padding:10px; background:rgba(21,101,192,0.08); border-radius:10px; border:1px solid rgba(21,101,192,0.2);"><div style="font-weight:600; color:#1565C0;">✋ ${u.full_name}</div><div style="font-size:12px; color:#666;">Acknowledged on ${new Date(ackBy.approved_at).toLocaleString()}</div></div>`;
           } else {
@@ -2451,6 +2456,15 @@
       if (error) { showToast(error.message, 'error'); return; }
       await supabase.from('breakdowns').update({ status: 'machine_running' }).eq('id', id);
       showToast('Breakdown acknowledged. Status updated to In Progress.', 'success');
+      closeModal();
+      loadBreakdownsPage();
+      loadDashboard();
+    }
+
+    async function attendBreakdown(id) {
+      const { error } = await supabase.from('breakdown_approvals').insert({ breakdown_id: id, user_id: currentUser.id, type: 'attended', remarks: null });
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('Breakdown marked as attended. Now pending final approvals.', 'success');
       closeModal();
       loadBreakdownsPage();
       loadDashboard();
@@ -2484,9 +2498,10 @@
 
     function getBreakdownWorkflowStage(breakdown, approvals, requiredCount) {
       const hasAck = (approvals || []).some(a => a.type === 'acknowledge');
+      const hasAttended = (approvals || []).some(a => a.type === 'attended');
       const finalCount = (approvals || []).filter(a => a.type === 'approve').length;
       if (finalCount >= requiredCount && requiredCount > 0) return 'closed';
-      if (finalCount > 0) return 'pending_approval';
+      if (hasAttended) return 'pending_approval';
       if (hasAck || breakdown.status === 'machine_running') return 'in_progress';
       return 'open';
     }
