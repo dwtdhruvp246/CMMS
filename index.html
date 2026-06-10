@@ -1251,7 +1251,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script>
-    let supabase = null;
     const SUPABASE_URL = 'https://hniwmubfijvlfmftihhl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXdtdWJmaWp2bGZtZnRpaGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDE2MDYsImV4cCI6MjA5NjU3NzYwNn0.7prKa1OKM43SqO7sjhMSvy-F2Nm0RxeA5qRKnDz492o';
 
@@ -1285,7 +1284,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const { createClient } = window.supabase;
-      supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
       updateInternetStatus();
       window.addEventListener('online', updateInternetStatus);
       window.addEventListener('offline', updateInternetStatus);
