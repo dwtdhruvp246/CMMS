@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CMMS Dashboard</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg-start: #E3F2FD;
@@ -135,7 +137,6 @@
       box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.3), 0 0 0 3px rgba(21,101,192,0.15);
     }
     .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
-    .form-input, .form-select, .form-textarea { color: #111111; }
     .form-select option { background: #ffffff; color: #111111; }
     .form-textarea { min-height: 100px; resize: vertical; }
     .table-container { overflow-x: auto; border-radius: var(--radius); }
@@ -769,8 +770,8 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
     @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    .chart-container { position: relative; height: 220px; width: 100%; }
   </style>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -868,7 +869,7 @@
             <div class="card-label">Scheduled Maintenance</div>
           </div>
         </div>
-        <div class="grid-2">
+        <div class="grid-2 mb-6">
           <div class="glass" style="padding: 24px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
               <h3 style="font-size:18px; font-weight:700;">📅 Upcoming Scheduled Maintenance</h3>
@@ -882,6 +883,26 @@
               <button class="btn btn-soft btn-xs" onclick="navigateTo('breakdowns')">View All</button>
             </div>
             <div id="dash-recent-list"></div>
+          </div>
+        </div>
+        <div class="grid-2 mb-6">
+          <div class="glass" style="padding: 24px;">
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">⚡ My Pending Actions</h3>
+            <div id="dash-pending-actions"></div>
+          </div>
+          <div class="glass" style="padding: 24px;">
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">📈 Breakdown Trends (30 Days)</h3>
+            <div class="chart-container"><canvas id="trend-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="glass" style="padding: 24px;">
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">📊 Status Distribution</h3>
+            <div class="chart-container"><canvas id="status-chart"></canvas></div>
+          </div>
+          <div class="glass" style="padding: 24px;">
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">🏭 Top Machines (Breakdowns)</h3>
+            <div class="chart-container"><canvas id="machine-chart"></canvas></div>
           </div>
         </div>
       </div>
@@ -920,6 +941,16 @@
           </button>
         </div>
         <div class="glass" style="padding: 24px;">
+          <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+            <input type="text" class="form-input" id="breakdown-search" placeholder="Search breakdowns..." style="flex:1; min-width:200px;" onkeyup="filterBreakdowns()">
+            <select class="form-select" id="breakdown-filter-status" style="width:160px;" onchange="filterBreakdowns()">
+              <option value="">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="pending_approval">Pending Approval</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
           <div class="table-container">
             <table class="data-table">
               <thead>
@@ -1180,11 +1211,11 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
               <h3 style="font-size:18px; font-weight:700;">System Users</h3>
               <div class="flex gap-3">
-              <button class="btn btn-primary btn-sm hidden" id="btn-add-user" onclick="openAddUserModal()">➕ Add User</button>
-              <button class="btn btn-soft btn-sm" onclick="downloadTemplate('users')">📥 Template</button>
-              <button class="btn btn-success btn-sm" onclick="document.getElementById('upload-users').click()">📤 Upload Excel</button>
-              <input type="file" id="upload-users" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleUpload('users', this)">
-            </div>
+                <button class="btn btn-primary btn-sm hidden" id="btn-add-user" onclick="openAddUserModal()">➕ Add User</button>
+                <button class="btn btn-soft btn-sm" onclick="downloadTemplate('users')">📥 Template</button>
+                <button class="btn btn-success btn-sm" onclick="document.getElementById('upload-users').click()">📤 Upload Excel</button>
+                <input type="file" id="upload-users" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleUpload('users', this)">
+              </div>
             </div>
             <div class="table-container">
               <table class="data-table">
@@ -1208,11 +1239,11 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
               <h3 style="font-size:18px; font-weight:700;">Role Master</h3>
               <div class="flex gap-3">
-              <button class="btn btn-primary btn-sm hidden" id="btn-add-role" onclick="openAddRoleModal()">➕ Add Role</button>
-              <button class="btn btn-soft btn-sm" onclick="downloadTemplate('roles')">📥 Template</button>
-              <button class="btn btn-success btn-sm" onclick="document.getElementById('upload-roles').click()">📤 Upload Excel</button>
-              <input type="file" id="upload-roles" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleUpload('roles', this)">
-            </div>
+                <button class="btn btn-primary btn-sm hidden" id="btn-add-role" onclick="openAddRoleModal()">➕ Add Role</button>
+                <button class="btn btn-soft btn-sm" onclick="downloadTemplate('roles')">📥 Template</button>
+                <button class="btn btn-success btn-sm" onclick="document.getElementById('upload-roles').click()">📤 Upload Excel</button>
+                <input type="file" id="upload-roles" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleUpload('roles', this)">
+              </div>
             </div>
             <div class="table-container">
               <table class="data-table">
@@ -1253,11 +1284,15 @@
     const SUPABASE_URL = 'https://hniwmubfijvlfmftihhl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXdtdWJmaWp2bGZtZnRpaGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDE2MDYsImV4cCI6MjA5NjU3NzYwNn0.7prKa1OKM43SqO7sjhMSvy-F2Nm0RxeA5qRKnDz492o';
 
+    let supabase = null;
     let currentUser = null;
     let currentPermissions = {};
     let calendarDate = new Date();
     let modalCallback = null;
     let editingId = null;
+    let trendChartInstance = null;
+    let statusChartInstance = null;
+    let machineChartInstance = null;
 
     const MODULES = {
       'dashboard': 'dashboard',
@@ -1283,7 +1318,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const { createClient } = window.supabase;
-      window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
       updateInternetStatus();
       window.addEventListener('online', updateInternetStatus);
       window.addEventListener('offline', updateInternetStatus);
@@ -1496,10 +1531,160 @@
         recList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>No recent breakdowns.</p></div>';
       } else {
         recList.innerHTML = recent.map(b => {
-          const stage = b.status === 'machine_stopped' ? 'open' : 'in_progress';
-          const stageLabel = stage === 'open' ? 'Open' : 'In Progress';
+          const stage = getBreakdownWorkflowStage(b, (allApprovals || []).filter(a => a.breakdown_id === b.id), 1);
+          const stageLabel = stage === 'open' ? 'Open' : stage === 'in_progress' ? 'In Progress' : stage === 'pending_approval' ? 'Pending Approval' : 'Closed';
           return `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="viewBreakdown('${b.id}')"><div><div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown fault'}</div></div><div class="badge badge-${stage}">${stageLabel}</div></div>`;
         }).join('');
+      }
+
+      await loadDashboardCharts();
+      await loadPendingActions();
+    }
+
+    async function loadDashboardCharts() {
+      if (trendChartInstance) trendChartInstance.destroy();
+      if (statusChartInstance) statusChartInstance.destroy();
+      if (machineChartInstance) machineChartInstance.destroy();
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data: breakdowns } = await supabase.from('breakdowns')
+        .select('*, machines(name), fault_types(name)')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      const dateMap = {};
+      for (let i = 0; i < 30; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dateMap[d.toISOString().split('T')[0]] = 0;
+      }
+      (breakdowns || []).forEach(b => {
+        const date = b.created_at.split('T')[0];
+        if (dateMap[date] !== undefined) dateMap[date]++;
+      });
+      const labels = Object.keys(dateMap).sort();
+      const values = labels.map(d => dateMap[d]);
+
+      const ctx1 = document.getElementById('trend-chart').getContext('2d');
+      trendChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: labels.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+          datasets: [{
+            label: 'Breakdowns',
+            data: values,
+            borderColor: '#1565C0',
+            backgroundColor: 'rgba(21, 101, 192, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+
+      const { data: allBreakdowns } = await supabase.from('breakdowns').select('id, status, machine_id, fault_type_id');
+      const { data: allApprovals } = await supabase.from('breakdown_approvals').select('breakdown_id, type');
+      let o = 0, ip = 0, pa = 0, c = 0;
+      for (const b of (allBreakdowns || [])) {
+        const bd = (allApprovals || []).filter(a => a.breakdown_id === b.id);
+        const rc = (await getRequiredApprovers(b)).length || 1;
+        const s = getBreakdownWorkflowStage(b, bd, rc);
+        if (s === 'open') o++; else if (s === 'in_progress') ip++; else if (s === 'pending_approval') pa++; else if (s === 'closed') c++;
+      }
+
+      const ctx2 = document.getElementById('status-chart').getContext('2d');
+      statusChartInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Open', 'In Progress', 'Pending Approval', 'Closed'],
+          datasets: [{
+            data: [o, ip, pa, c],
+            backgroundColor: ['#B71C1C', '#E65100', '#0D47A1', '#1B5E20']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      const machineCounts = {};
+      (breakdowns || []).forEach(b => {
+        const name = b.machines?.name || 'Unknown';
+        machineCounts[name] = (machineCounts[name] || 0) + 1;
+      });
+      const sortedMachines = Object.entries(machineCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      const ctx3 = document.getElementById('machine-chart').getContext('2d');
+      machineChartInstance = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+          labels: sortedMachines.map(m => m[0]),
+          datasets: [{
+            label: 'Breakdowns',
+            data: sortedMachines.map(m => m[1]),
+            backgroundColor: 'rgba(21, 101, 192, 0.7)',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    async function loadPendingActions() {
+      const { data: breakdowns } = await supabase.from('breakdowns')
+        .select('*, machines(name), fault_types(name)')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      const { data: allApprovals } = await supabase.from('breakdown_approvals').select('breakdown_id, type, user_id');
+
+      const pending = [];
+      for (const b of (breakdowns || [])) {
+        const bdApprovals = (allApprovals || []).filter(a => a.breakdown_id === b.id);
+        const requiredIds = await getRequiredApprovers(b);
+        if (!requiredIds.includes(currentUser.id)) continue;
+
+        const requiredCount = requiredIds.length || 1;
+        const stage = getBreakdownWorkflowStage(b, bdApprovals, requiredCount);
+
+        const ack = bdApprovals.find(a => a.type === 'acknowledge');
+        const attended = bdApprovals.find(a => a.type === 'attended');
+        const myApprovals = bdApprovals.filter(a => a.type === 'approve' && a.user_id === currentUser.id);
+
+        let action = null;
+        if (stage === 'open' && !ack) action = 'Acknowledge';
+        else if (stage === 'in_progress' && !attended) action = 'Attend';
+        else if (stage === 'pending_approval' && myApprovals.length === 0) action = 'Approve';
+
+        if (action) {
+          pending.push({ ...b, action, stage });
+        }
+      }
+
+      const container = document.getElementById('dash-pending-actions');
+      if (pending.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="padding:24px;"><div class="empty-state-icon">✅</div><p>No pending actions for you.</p></div>';
+      } else {
+        container.innerHTML = pending.map(b => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="viewBreakdown('${b.id}')">
+            <div>
+              <div style="font-weight:600;">${b.machines?.name || 'Unknown'}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${b.fault_types?.name || 'Unknown'} • ${b.description.substring(0, 40)}${b.description.length > 40 ? '...' : ''}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="badge badge-${b.stage}">${b.action}</span>
+            </div>
+          </div>
+        `).join('');
       }
     }
 
@@ -1561,6 +1746,24 @@
         }));
         tbody.innerHTML = rows.join('');
       }
+    }
+
+    function filterBreakdowns() {
+      const search = document.getElementById('breakdown-search').value.toLowerCase();
+      const status = document.getElementById('breakdown-filter-status').value;
+      const rows = document.querySelectorAll('#breakdowns-table-body tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const badge = row.querySelector('[class*="badge-"]');
+        let rowStatus = '';
+        if (badge) {
+          const match = badge.className.match(/badge-(open|in_progress|pending_approval|closed)/);
+          if (match) rowStatus = match[1];
+        }
+        const matchSearch = text.includes(search);
+        const matchStatus = !status || rowStatus === status;
+        row.style.display = matchSearch && matchStatus ? '' : 'none';
+      });
     }
 
     async function openAddBreakdownModal(fromMyMachines) {
@@ -1625,7 +1828,7 @@
       if (!list || list.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No scheduled maintenance.</p></div>';
       } else {
-        container.innerHTML = list.map(m => `<div style="display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${m.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${m.date} at ${m.time} &bull; ${m.description || 'No description'}</div></div><div style="display:flex; gap:8px; align-items:center;"><span class="badge badge-${m.status}">${m.status}</span><button class="btn btn-soft btn-xs" onclick="viewMaintenance('${m.id}')">👁️ View</button>${canEdit('scheduled_maintenance') ? `<button class="btn btn-soft btn-xs" onclick="editMaintenance('${m.id}')">Edit</button>` : ''}${canDelete('scheduled_maintenance') ? `<button class="btn btn-danger btn-xs" onclick="deleteMaintenance('${m.id}')">Delete</button>` : ''}</div></div>`).join('');
+        container.innerHTML = list.map(m => `<div style="display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${m.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${m.date} at ${m.time} • ${m.description || 'No description'}</div></div><div style="display:flex; gap:8px; align-items:center;"><span class="badge badge-${m.status}">${m.status}</span><button class="btn btn-soft btn-xs" onclick="viewMaintenance('${m.id}')">👁️ View</button>${canEdit('scheduled_maintenance') ? `<button class="btn btn-soft btn-xs" onclick="editMaintenance('${m.id}')">Edit</button>` : ''}${canDelete('scheduled_maintenance') ? `<button class="btn btn-danger btn-xs" onclick="deleteMaintenance('${m.id}')">Delete</button>` : ''}</div></div>`).join('');
       }
     }
 
@@ -1664,7 +1867,7 @@
     async function showDayEvents(dateStr) {
       const { data: events } = await supabase.from('scheduled_maintenance').select('*, machines(name)').eq('date', dateStr);
       if (!events || events.length === 0) { showToast(`No maintenance scheduled for ${dateStr}`, 'info'); return; }
-      const html = events.map(e => `<div style="padding:12px; margin-bottom:8px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-weight:600;">${e.machines?.name || 'Unknown'}</div><div style="font-size:13px; color:var(--text-muted);">${e.time} &bull; ${e.description || 'No description'}</div></div>`).join('');
+      const html = events.map(e => `<div style="padding:12px; margin-bottom:8px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-weight:600;">${e.machines?.name || 'Unknown'}</div><div style="font-size:13px; color:var(--text-muted);">${e.time} • ${e.description || 'No description'}</div></div>`).join('');
       openModal(`Maintenance on ${dateStr}`, html, () => {});
       document.getElementById('modal-footer').classList.add('hidden');
     }
@@ -1947,10 +2150,7 @@
         const roleChecked = document.querySelectorAll('.fault-role-check:checked');
         const roleInserts = [];
         roleChecked.forEach(cb => roleInserts.push({ fault_type_id: newFault.id, role_id: cb.value }));
-        if (roleInserts.length > 0) {
-          const { error: roleErr } = await supabase.from('fault_type_roles').insert(roleInserts);
-          if (roleErr) { showToast('Fault type created but roles failed: ' + roleErr.message, 'error'); }
-        }
+        if (roleInserts.length > 0) await supabase.from('fault_type_roles').insert(roleInserts);
         showToast('Fault type added', 'success');
         loadFaultTypes();
       });
@@ -1992,10 +2192,7 @@
         const roleChecked = document.querySelectorAll('.fault-role-check:checked');
         const roleInserts = [];
         roleChecked.forEach(cb => roleInserts.push({ fault_type_id: id, role_id: cb.value }));
-        if (roleInserts.length > 0) {
-          const { error: roleErr } = await supabase.from('fault_type_roles').insert(roleInserts);
-          if (roleErr) { showToast('Fault type updated but roles failed: ' + roleErr.message, 'error'); return; }
-        }
+        if (roleInserts.length > 0) await supabase.from('fault_type_roles').insert(roleInserts);
         showToast('Fault type updated', 'success');
         loadFaultTypes();
       });
@@ -2262,9 +2459,6 @@
       if (e.key === 'Escape') closeModal();
     });
 
-    // ============================================
-    // EXCEL TEMPLATE DOWNLOAD & UPLOAD
-    // ============================================
     function downloadTemplate(type) {
       const wb = XLSX.utils.book_new();
       let ws_data, filename;
@@ -2361,8 +2555,7 @@
       const deptMap = {}; (depts || []).forEach(d => deptMap[d.name] = d.id);
       const posMap = {}; (positions || []).forEach(p => posMap[p.name] = p.id);
       const roleMap = {}; (roles || []).forEach(r => roleMap[r.name] = r.id);
-      let successCount = 0;
-      let failCount = 0;
+      let successCount = 0, failCount = 0;
       for (const row of dataRows) {
         const fullname = String(row[0]).trim();
         const username = String(row[1]).trim();
@@ -2391,9 +2584,6 @@
       loadUsersTab();
     }
 
-    // ============================================
-    // VIEW & APPROVAL WORKFLOW (4 STAGES)
-    // ============================================
     async function viewBreakdown(id) {
       const { data: b } = await supabase.from('breakdowns').select('*, machines(name), fault_types(name), downtime_impacts(name), priorities(name), users(full_name)').eq('id', id).single();
       if (!b) return;
@@ -2401,31 +2591,35 @@
       const requiredCount = requiredIds.length || 1;
       const { data: approvals } = await supabase.from('breakdown_approvals').select('*, users(full_name)').eq('breakdown_id', id);
       const ack = (approvals || []).find(a => a.type === 'acknowledge');
-      const attended = (approvals || []).find(a => a.type === 'attended');
+      const hasAttended = (approvals || []).some(a => a.type === 'attended');
       const finalApprovals = (approvals || []).filter(a => a.type === 'approve');
       const approvedIds = new Set(finalApprovals.map(a => a.user_id));
       const stage = getBreakdownWorkflowStage(b, approvals || [], requiredCount);
       const stageLabel = stage === 'open' ? 'Open' : stage === 'in_progress' ? 'In Progress' : stage === 'pending_approval' ? 'Pending Approval' : 'Closed';
 
       const isRequired = requiredIds.includes(currentUser.id);
-      const canAcknowledge = isRequired && stage === 'open';
-      const canAttend = isRequired && stage === 'in_progress';
-      const canApprove = isRequired && stage === 'pending_approval' && !approvedIds.has(currentUser.id);
+      const canAcknowledge = !ack && isRequired && stage === 'open';
+      const canAttend = ack && !hasAttended && isRequired && stage === 'in_progress';
+      const canApprove = hasAttended && !approvedIds.has(currentUser.id) && isRequired && stage === 'pending_approval';
 
       let actionsHtml = '';
       if (canAcknowledge) {
         actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="acknowledgeBreakdown('${id}')"><span>✋</span> Acknowledge / Attending</button>`;
-      } else if (canAttend) {
-        actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="attendBreakdown('${id}')"><span>🔧</span> Breakdown Attended</button>`;
-      } else if (canApprove) {
-        actionsHtml += `<div class="form-group"><label class="form-label">Approval Remarks (optional)</label><textarea class="form-textarea" id="approval-remarks" placeholder="Add remarks about this approval..."></textarea></div><button class="btn btn-success w-full" onclick="approveBreakdown('${id}', '${requiredIds.join(',')}')"><span>✅</span> Approve Breakdown</button>`;
-      } else if (!isRequired && stage !== 'closed') {
+      } else if (!isRequired && !ack) {
         actionsHtml += `<div style="padding:12px; background:rgba(255,170,0,0.08); border-radius:10px; text-align:center;"><span style="color:#E65100; font-weight:600;">⏳ You are not authorized to approve this breakdown.</span></div>`;
+      }
+
+      if (canAttend) {
+        actionsHtml += `<button class="btn btn-primary w-full mb-3" onclick="attendBreakdown('${id}')"><span>🔧</span> Breakdown Attended</button>`;
+      }
+
+      if (canApprove) {
+        actionsHtml += `<div class="form-group"><label class="form-label">Approval Remarks (optional)</label><textarea class="form-textarea" id="approval-remarks" placeholder="Add remarks about this approval..."></textarea></div><button class="btn btn-success w-full" onclick="approveBreakdown('${id}', '${requiredIds.join(',')}')"><span>✅</span> Completed Breakdown Approval</button>`;
       } else if (approvedIds.has(currentUser.id)) {
         actionsHtml += `<div style="padding:12px; background:rgba(0,255,136,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ You have already approved this breakdown.</span></div>`;
       }
 
-      if (stage === 'closed') {
+      if (!actionsHtml && stage === 'closed') {
         actionsHtml = `<div style="padding:12px; background:rgba(0,255,136,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ This breakdown is closed. All managers have approved.</span></div>`;
       }
 
@@ -2437,12 +2631,9 @@
         approversHtml = '<div style="display:flex; flex-direction:column; gap:8px;">';
         (reqUsers || []).forEach(u => {
           const ackBy = ack?.user_id === u.id ? ack : null;
-          const attBy = attended?.user_id === u.id ? attended : null;
           const appBy = finalApprovals.find(a => a.user_id === u.id);
           if (appBy) {
             approversHtml += `<div style="padding:10px; background:rgba(0,255,136,0.08); border-radius:10px; border:1px solid rgba(0,255,136,0.2);"><div style="font-weight:600; color:#1B5E20;">✅ ${u.full_name}</div><div style="font-size:12px; color:#666;">Approved on ${new Date(appBy.approved_at).toLocaleString()}</div>${appBy.remarks ? `<div style="font-size:13px; margin-top:4px; font-style:italic; color:#333;">"${appBy.remarks}"</div>` : ''}</div>`;
-          } else if (attBy) {
-            approversHtml += `<div style="padding:10px; background:rgba(21,101,192,0.08); border-radius:10px; border:1px solid rgba(21,101,192,0.2);"><div style="font-weight:600; color:#1565C0;">🔧 ${u.full_name}</div><div style="font-size:12px; color:#666;">Marked attended on ${new Date(attBy.approved_at).toLocaleString()}</div></div>`;
           } else if (ackBy) {
             approversHtml += `<div style="padding:10px; background:rgba(21,101,192,0.08); border-radius:10px; border:1px solid rgba(21,101,192,0.2);"><div style="font-weight:600; color:#1565C0;">✋ ${u.full_name}</div><div style="font-size:12px; color:#666;">Acknowledged on ${new Date(ackBy.approved_at).toLocaleString()}</div></div>`;
           } else {
@@ -2470,7 +2661,7 @@
     async function attendBreakdown(id) {
       const { error } = await supabase.from('breakdown_approvals').insert({ breakdown_id: id, user_id: currentUser.id, type: 'attended', remarks: null });
       if (error) { showToast(error.message, 'error'); return; }
-      showToast('Breakdown marked as attended. Now pending final approvals.', 'success');
+      showToast('Breakdown marked as attended. Status updated to Pending Approval.', 'success');
       closeModal();
       loadBreakdownsPage();
       loadDashboard();
