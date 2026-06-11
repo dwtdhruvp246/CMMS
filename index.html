@@ -70,8 +70,8 @@
       border-bottom: 1px solid var(--border-light);
     }
     .sidebar-logo {
-      width: 40px;
-      height: 40px;
+      width: 56px;
+      height: 56px;
       border-radius: 10px;
       background: var(--accent);
       display: flex;
@@ -166,8 +166,8 @@
       border: 1px solid var(--border-light);
     }
     .user-avatar {
-      width: 36px;
-      height: 36px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       background: var(--accent);
       display: flex;
@@ -708,8 +708,8 @@
       margin-bottom: 40px;
     }
     .login-header .logo-icon {
-      width: 56px;
-      height: 56px;
+      width: 72px;
+      height: 72px;
       border-radius: 14px;
       background: var(--accent);
       display: flex;
@@ -803,14 +803,14 @@
       margin-bottom: 8px;
     }
     .a4-report-title {
-      font-size: 24px;
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: 2px;
       color: #1A1A1A;
       text-transform: uppercase;
     }
     .a4-report-subtitle {
-      font-size: 13px;
+      font-size: 16px;
       color: #666;
       margin-top: 4px;
       font-weight: 500;
@@ -909,8 +909,8 @@
       top: 16px;
       left: 16px;
       z-index: 101;
-      width: 40px;
-      height: 40px;
+      width: 56px;
+      height: 56px;
       border-radius: var(--radius-xs);
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -950,20 +950,20 @@
        COMPANY LOGO
        ============================================ */
     .sidebar-logo img {
-      width: 28px;
-      height: 28px;
+      width: 50px;
+      height: 50px;
       object-fit: contain;
       display: block;
     }
     .login-header .logo-icon img {
-      width: 36px;
-      height: 36px;
+      width: 52px;
+      height: 52px;
       object-fit: contain;
       display: block;
     }
     .a4-report-logo img {
-      width: 48px;
-      height: 48px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
       display: block;
       margin: 0 auto;
@@ -1666,12 +1666,12 @@
       // Sidebar logo
       const sidebarLogo = document.querySelector('.sidebar-logo');
       if (sidebarLogo) {
-        sidebarLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:28px; height:28px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\'></path></svg>';">`;
+        sidebarLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:50px; height:50px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\'></path></svg>';">`;
       }
       // Login page logo
       const loginLogo = document.querySelector('.login-header .logo-icon');
       if (loginLogo) {
-        loginLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';">`;
+        loginLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:52px; height:52px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';">`;
         loginLogo.style.background = 'transparent';
         loginLogo.style.boxShadow = 'none';
       }
@@ -1682,7 +1682,7 @@
         if (p) {
           const companyLine = document.createElement('p');
           companyLine.className = 'company-name-line';
-          companyLine.style.cssText = 'font-weight:600; color:var(--text-secondary); font-size:13px; margin-top:4px; margin-bottom:8px;';
+          companyLine.style.cssText = 'font-weight:600; color:var(--text-secondary); font-size:18px; margin-top:4px; margin-bottom:8px;';
           companyLine.textContent = COMPANY_NAME;
           p.parentNode.insertBefore(companyLine, p);
         }
@@ -2224,7 +2224,7 @@
 
       return `<div class="a4-report-card" id="${reportId}">
         <div class="a4-report-header">
-          <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:48px; height:48px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
+          <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:72px; height:72px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
           <div class="a4-report-title">BREAKDOWN REPORT</div>
           <div class="a4-report-subtitle">${COMPANY_NAME} — Computerized Maintenance Management System</div>
         </div>
@@ -2314,7 +2314,7 @@
 
       return `<div class="a4-report-card" id="${reportId}">
         <div class="a4-report-header">
-          <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:48px; height:48px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
+          <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:72px; height:72px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
           <div class="a4-report-title">MAINTENANCE REPORT</div>
           <div class="a4-report-subtitle">${COMPANY_NAME} — Computerized Maintenance Management System</div>
         </div>
