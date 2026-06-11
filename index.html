@@ -2584,9 +2584,7 @@
       // Who can act? Involved department members, machine manager, or edit-permission users
       const userDeptId = currentUser.department_id;
       const isInvolvedDept = involvedDepts.some(d => d.id === userDeptId);
-      const isManager = machine?.manager_id === currentUser.id;
-      const canEditMaint = canEdit('scheduled_maintenance');
-      const canAct = isInvolvedDept || isManager || canEditMaint;
+      const canAct = isInvolvedDept;
 
       const userWorking = (approvals || []).find(a => a.user_id === currentUser.id && a.type === 'working');
       const userDone = (approvals || []).find(a => a.user_id === currentUser.id && a.type === 'done');
@@ -2613,7 +2611,7 @@
           actionsHtml += `<div style="padding:12px; background:rgba(27,94,32,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ You have marked this maintenance as done.</span></div>`;
         }
       } else if (!canAct && !allDone) {
-        actionsHtml += `<div style="padding:12px; background:rgba(230,81,0,0.08); border-radius:10px; text-align:center;"><span style="color:#E65100; font-weight:600;">⏳ Only involved department members can act on this maintenance.</span></div>`;
+        actionsHtml += `<div style="padding:12px; background:rgba(230,81,0,0.08); border-radius:10px; text-align:center;"><span style="color:#E65100; font-weight:600;">⏳ Only members of the involved departments can act on this maintenance.</span></div>`;
       } else if (allDone) {
         actionsHtml += `<div style="padding:12px; background:rgba(27,94,32,0.08); border-radius:10px; text-align:center;"><span style="color:#1B5E20; font-weight:600;">✅ All departments have completed this maintenance.</span></div>`;
       }
