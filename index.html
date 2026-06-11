@@ -70,10 +70,10 @@
       border-bottom: 1px solid var(--border-light);
     }
     .sidebar-logo {
-      width: 56px;
-      height: 56px;
+      width: 72px;
+      height: 72px;
       border-radius: 10px;
-      background: var(--accent);
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -950,8 +950,8 @@
        COMPANY LOGO
        ============================================ */
     .sidebar-logo img {
-      width: 50px;
-      height: 50px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
       display: block;
     }
@@ -1666,7 +1666,7 @@
       // Sidebar logo
       const sidebarLogo = document.querySelector('.sidebar-logo');
       if (sidebarLogo) {
-        sidebarLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:50px; height:50px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\'></path></svg>';">`;
+        sidebarLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:72px; height:72px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\'></path></svg>';">`;
       }
       // Login page logo
       const loginLogo = document.querySelector('.login-header .logo-icon');
