@@ -778,29 +778,126 @@
     /* ============================================
        PRINT
        ============================================ */
-    .printable-report {
+    /* A4 Report Card Styles */
+    .a4-report-card {
       background: white;
       color: #1A1A1A;
-      padding: 40px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 24px;
+      padding: 48px 56px;
       border-radius: var(--radius);
-      display: none;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
     }
-    .printable-report.active { display: block; }
+    .a4-report-header {
+      text-align: center;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+    .a4-report-logo {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    .a4-report-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #1A1A1A;
+      text-transform: uppercase;
+    }
+    .a4-report-subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .a4-report-meta {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: #FAFAFA;
+      border-radius: 6px;
+    }
+    .a4-report-section {
+      margin-bottom: 24px;
+    }
+    .a4-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1A1A1A;
+      border-bottom: 2px solid var(--accent-light);
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .a4-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .a4-field {
+      background: #FAFAFA;
+      padding: 12px 16px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+    .a4-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .a4-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1A1A1A;
+    }
+    .a4-report-footer {
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+      margin-top: 32px;
+    }
+
     @media print {
-      body * { visibility: hidden; }
-      .printable-report, .printable-report * { visibility: visible; }
-      .printable-report {
+      body * { visibility: hidden !important; }
+      .a4-report-card, .a4-report-card * { visibility: visible !important; }
+      .a4-report-card {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
+        max-width: 100%;
         margin: 0;
-        padding: 20px;
-        background: white;
-        color: black;
+        padding: 20px 30px;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        page-break-after: always;
+      }
+      .a4-report-card:last-child {
+        page-break-after: auto;
       }
       .no-print { display: none !important; }
+    }
+    @media (max-width: 640px) {
+      .a4-report-card { padding: 24px; }
+      .a4-grid-2 { grid-template-columns: 1fr; }
+      .a4-report-meta { flex-direction: column; }
     }
 
     /* ============================================
@@ -1176,64 +1273,49 @@
         <div class="page-header">
           <div>
             <div class="page-title">Reports</div>
-            <div class="page-subtitle">Generate and download maintenance reports</div>
+            <div class="page-subtitle">Generate detailed event reports</div>
           </div>
         </div>
-        <div class="card" style="padding: 24px; margin-bottom: 24px;">
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:20px;">🔍 Generate Report</h3>
-          <div class="grid-2">
-            <div class="form-group">
+
+        <!-- FILTER PANEL -->
+        <div class="card" style="padding: 28px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 16px; align-items: end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Machine</label>
+              <select class="form-select" id="report-machine">
+                <option value="">All Machines</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Report Type</label>
+              <select class="form-select" id="report-type">
+                <option value="breakdown">Breakdown Report</option>
+                <option value="maintenance">Maintenance Report</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">Date From</label>
               <input type="date" class="form-input" id="report-date-from">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">Date To</label>
               <input type="date" class="form-input" id="report-date-to">
             </div>
-            <div class="form-group">
-              <label class="form-label">Machine</label>
-              <select class="form-select" id="report-machine"><option value="">All Machines</option></select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Status</label>
-              <select class="form-select" id="report-status">
-                <option value="">All Statuses</option>
-                <option value="machine_stopped">Machine Stopped</option>
-                <option value="machine_running">Machine Still Running</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex gap-3 mt-4">
-            <button class="btn btn-primary" onclick="generateReport()">
-              <span>📊</span> Generate Report
-            </button>
-            <button class="btn btn-soft" onclick="printCurrentReport()">
-              <span>🖨️</span> Print / Save PDF
+            <button class="btn btn-primary" onclick="generateReports()" style="height: 44px; padding: 0 24px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Generate
             </button>
           </div>
         </div>
-        <div class="printable-report card" id="printable-report">
-          <div style="text-align:center; margin-bottom:30px; border-bottom:2px solid #eee; padding-bottom:20px;">
-            <h1 style="font-size:28px; margin-bottom:8px; color:#1A1A1A;">CMMS Maintenance Report</h1>
-            <p style="color:#666;" id="report-meta">Generated on ...</p>
-          </div>
-          <div id="report-content"></div>
-        </div>
-        <div class="card" style="padding: 24px;">
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:20px;">📄 Previous Reports</h3>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Generated By</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="reports-table-body"></tbody>
-            </table>
-          </div>
+
+        <!-- REPORTS RESULTS AREA -->
+        <div id="reports-results"></div>
+
+        <!-- EMPTY STATE -->
+        <div id="reports-empty" class="empty-state" style="display:none;">
+          <div class="empty-state-icon">📄</div>
+          <p style="font-size:16px; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">No reports generated yet</p>
+          <p style="font-size:14px; color:var(--text-muted);">Select a machine and report type, then click Generate.</p>
         </div>
       </div>
 
@@ -1990,65 +2072,245 @@
       const { data: machines } = await supabase.from('machines').select('id, name').order('name');
       const sel = document.getElementById('report-machine');
       sel.innerHTML = '<option value="">All Machines</option>' + (machines || []).map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-      const { data: reports } = await supabase.from('reports').select('*, users(full_name)').order('created_at', { ascending: false });
-      const tbody = document.getElementById('reports-table-body');
-      if (!reports || reports.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding:24px;">No reports generated yet.</td></tr>';
-      } else {
-        tbody.innerHTML = reports.map(r => `<tr><td>${r.title}</td><td>${r.users?.full_name || 'N/A'}</td><td>${new Date(r.created_at).toLocaleDateString()}</td><td><button class="btn btn-soft btn-xs" onclick="viewReport('${r.id}')">View</button>${canDelete('reports') ? `<button class="btn btn-danger btn-xs" onclick="deleteReport('${r.id}')">Delete</button>` : ''}</td></tr>`).join('');
-      }
+      document.getElementById('reports-results').innerHTML = '';
+      document.getElementById('reports-empty').style.display = 'block';
     }
 
-    async function generateReport() {
+    async function generateReports() {
       const from = document.getElementById('report-date-from').value;
       const to = document.getElementById('report-date-to').value;
       const machineId = document.getElementById('report-machine').value;
-      const status = document.getElementById('report-status').value;
-      let query = supabase.from('breakdowns').select('*, machines(name), fault_types(name), downtime_impacts(name), priorities(name), users(full_name)');
-      if (from) query = query.gte('created_at', from + 'T00:00:00');
-      if (to) query = query.lte('created_at', to + 'T23:59:59');
-      if (machineId) query = query.eq('machine_id', machineId);
-      if (status) query = query.eq('status', status);
-      const { data: breakdowns, error } = await query.order('created_at', { ascending: false });
-      if (error) { showToast(error.message, 'error'); return; }
-      const title = `Maintenance Report - ${new Date().toLocaleDateString()}`;
-      const filters = { from, to, machineId, status };
-      await supabase.from('reports').insert({ title, filters, generated_by: currentUser.id });
-      const reportDiv = document.getElementById('printable-report');
-      document.getElementById('report-meta').textContent = `Generated on ${new Date().toLocaleString()} by ${currentUser.full_name || currentUser.username}`;
-      let rows = '';
-      if (!breakdowns || breakdowns.length === 0) {
-        rows = '<tr><td colspan="7" style="text-align:center; padding:20px;">No data found for selected filters.</td></tr>';
+      const reportType = document.getElementById('report-type').value;
+      const container = document.getElementById('reports-results');
+      const empty = document.getElementById('reports-empty');
+
+      container.innerHTML = '<div class="empty-state"><div class="loading-spinner" style="width:32px; height:32px; margin-bottom:12px;"></div><p>Generating reports...</p></div>';
+      empty.style.display = 'none';
+
+      let items = [];
+      let machineName = 'All Machines';
+
+      if (reportType === 'breakdown') {
+        let query = supabase.from('breakdowns').select('*, machines(name, manager_id, operator_id), fault_types(name), downtime_impacts(name), priorities(name), users(full_name)');
+        if (from) query = query.gte('created_at', from + 'T00:00:00');
+        if (to) query = query.lte('created_at', to + 'T23:59:59');
+        if (machineId) query = query.eq('machine_id', machineId);
+        const { data: breakdowns, error } = await query.order('created_at', { ascending: false });
+        if (error) { showToast(error.message, 'error'); container.innerHTML = ''; empty.style.display = 'block'; return; }
+        items = breakdowns || [];
+        if (items.length > 0 && machineId) machineName = items[0].machines?.name || 'Selected Machine';
       } else {
-        rows = breakdowns.map(b => `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px;">${b.machines?.name || 'N/A'}</td><td style="padding:10px;">${b.description}</td><td style="padding:10px;">${b.fault_types?.name || 'N/A'}</td><td style="padding:10px;">${b.downtime_impacts?.name || 'N/A'}</td><td style="padding:10px;">${b.priorities?.name || 'N/A'}</td><td style="padding:10px;">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</td><td style="padding:10px;">${new Date(b.created_at).toLocaleDateString()}</td></tr>`).join('');
+        let query = supabase.from('scheduled_maintenance').select('*, machines(name, manager_id, operator_id), users(full_name)');
+        if (from) query = query.gte('date', from);
+        if (to) query = query.lte('date', to);
+        if (machineId) query = query.eq('machine_id', machineId);
+        const { data: maintenance, error } = await query.order('date', { ascending: false });
+        if (error) { showToast(error.message, 'error'); container.innerHTML = ''; empty.style.display = 'block'; return; }
+        items = maintenance || [];
+        if (items.length > 0 && machineId) machineName = items[0].machines?.name || 'Selected Machine';
       }
-      document.getElementById('report-content').innerHTML = `<div style="margin-bottom:20px; padding:15px; background:#f8f9fa; border-radius:8px;"><strong>Filters:</strong> From: ${from || 'All'} | To: ${to || 'All'} | Machine: ${machineId ? breakdowns?.[0]?.machines?.name || 'Selected' : 'All'} | Status: ${status || 'All'}</div><table style="width:100%; border-collapse:collapse; font-size:14px;"><thead style="background:#1a1a2e; color:white;"><tr><th style="padding:12px; text-align:left;">Machine</th><th style="padding:12px; text-align:left;">Description</th><th style="padding:12px; text-align:left;">Fault Type</th><th style="padding:12px; text-align:left;">Impact</th><th style="padding:12px; text-align:left;">Priority</th><th style="padding:12px; text-align:left;">Status</th><th style="padding:12px; text-align:left;">Date</th></tr></thead><tbody>${rows}</tbody></table>`;
-      reportDiv.classList.add('active');
-      showToast('Report generated. Click Print to save as PDF.', 'success');
-      loadReports();
+
+      if (items.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
+        showToast('No events found for the selected criteria.', 'info');
+        return;
+      }
+
+      // Generate individual report cards
+      let html = '';
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const reportId = `report-${reportType}-${item.id}`;
+        if (reportType === 'breakdown') {
+          html += await renderBreakdownReport(item, reportId, i + 1, items.length, machineName, from, to);
+        } else {
+          html += await renderMaintenanceReport(item, reportId, i + 1, items.length, machineName, from, to);
+        }
+      }
+
+      container.innerHTML = html;
+      showToast(`${items.length} reports generated. Click Print on each to save as PDF.`, 'success');
     }
 
-    function printCurrentReport() {
+    async function renderBreakdownReport(b, reportId, num, total, machineFilter, dateFrom, dateTo) {
+      // Get approvals
+      const { data: approvals } = await supabase.from('breakdown_approvals').select('*, users(full_name)').eq('breakdown_id', b.id).order('approved_at', { ascending: true });
+      const requiredIds = await getRequiredApprovers(b);
+      const requiredCount = requiredIds.length || 1;
+      const stage = getBreakdownWorkflowStage(b, approvals || [], requiredCount);
+      const stageLabel = stage === 'open' ? 'Open' : stage === 'in_progress' ? 'In Progress' : stage === 'pending_approval' ? 'Pending Approval' : 'Closed';
+
+      // Get machine manager/operator names
+      let managerName = 'N/A', operatorName = 'N/A';
+      if (b.machines?.manager_id) {
+        const { data: mgr } = await supabase.from('users').select('full_name').eq('id', b.machines.manager_id).single();
+        managerName = mgr?.full_name || 'N/A';
+      }
+      if (b.machines?.operator_id) {
+        const { data: op } = await supabase.from('users').select('full_name').eq('id', b.machines.operator_id).single();
+        operatorName = op?.full_name || 'N/A';
+      }
+
+      // Approval history rows
+      let approvalRows = '';
+      if (approvals && approvals.length > 0) {
+        approvals.forEach(a => {
+          const typeLabel = a.type === 'acknowledge' ? 'Acknowledged' : a.type === 'attended' ? 'Attended' : 'Approved';
+          approvalRows += `<tr><td style="padding:8px 12px; border:1px solid #ddd;">${a.users?.full_name || 'N/A'}</td><td style="padding:8px 12px; border:1px solid #ddd;">${typeLabel}</td><td style="padding:8px 12px; border:1px solid #ddd;">${new Date(a.approved_at).toLocaleString()}</td><td style="padding:8px 12px; border:1px solid #ddd;">${a.remarks || '-'}</td></tr>`;
+        });
+      } else {
+        approvalRows = '<tr><td colspan="4" style="padding:12px; text-align:center; color:#666; border:1px solid #ddd;">No approvals yet</td></tr>';
+      }
+
+      return `<div class="a4-report-card" id="${reportId}">
+        <div class="a4-report-header">
+          <div class="a4-report-logo">🔧</div>
+          <div class="a4-report-title">BREAKDOWN REPORT</div>
+          <div class="a4-report-subtitle">Computerized Maintenance Management System</div>
+        </div>
+        <div class="a4-report-meta">
+          <div><strong>Report #:</strong> ${num} of ${total}</div>
+          <div><strong>Generated:</strong> ${new Date().toLocaleString()}</div>
+          <div><strong>Generated By:</strong> ${currentUser.full_name || currentUser.username}</div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Event Information</div>
+          <div class="a4-grid-2">
+            <div class="a4-field"><div class="a4-label">Machine Name</div><div class="a4-value">${b.machines?.name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Reported Date</div><div class="a4-value">${new Date(b.created_at).toLocaleString()}</div></div>
+            <div class="a4-field"><div class="a4-label">Machine Manager</div><div class="a4-value">${managerName}</div></div>
+            <div class="a4-field"><div class="a4-label">Machine Operator</div><div class="a4-value">${operatorName}</div></div>
+            <div class="a4-field"><div class="a4-label">Reported By</div><div class="a4-value">${b.users?.full_name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Current Stage</div><div class="a4-value"><span style="display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; ${stage === 'closed' ? 'background:#F0FDF4; color:#166534;' : stage === 'pending_approval' ? 'background:#EFF6FF; color:#1E40AF;' : stage === 'in_progress' ? 'background:#FFFBEB; color:#92400E;' : 'background:#FEF2F2; color:#991B1B;'}">${stageLabel}</span></div></div>
+          </div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Breakdown Details</div>
+          <div class="a4-grid-2">
+            <div class="a4-field"><div class="a4-label">Fault Type</div><div class="a4-value">${b.fault_types?.name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Downtime Impact</div><div class="a4-value">${b.downtime_impacts?.name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Priority</div><div class="a4-value">${b.priorities?.name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Machine State (at report)</div><div class="a4-value">${b.status === 'machine_stopped' ? 'Machine Stopped' : 'Machine Still Running'}</div></div>
+          </div>
+          <div class="a4-field" style="margin-top:12px;"><div class="a4-label">Description</div><div class="a4-value" style="white-space:pre-wrap; line-height:1.6;">${b.description || 'No description provided.'}</div></div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Approval History (${(approvals || []).length} records)</div>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;">
+            <thead><tr style="background:#f5f5f5;"><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">User</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Action</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Date</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Remarks</th></tr></thead>
+            <tbody>${approvalRows}</tbody>
+          </table>
+        </div>
+        <div class="a4-report-footer">
+          <div>This report was generated by the CMMS Dashboard system.</div>
+          <div>© ${new Date().getFullYear()} — All rights reserved.</div>
+        </div>
+      </div>
+      <div class="no-print" style="display:flex; gap:12px; justify-content:center; margin-bottom:40px;">
+        <button class="btn btn-primary" onclick="printReport('${reportId}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print / Save PDF
+        </button>
+      </div>`;
+    }
+
+    async function renderMaintenanceReport(m, reportId, num, total, machineFilter, dateFrom, dateTo) {
+      // Get departments
+      const { data: deptJunctions } = await supabase.from('maintenance_departments').select('departments(name)').eq('maintenance_id', m.id);
+      const deptNames = (deptJunctions || []).map(j => j.departments?.name).filter(Boolean).join(', ') || 'None';
+
+      // Get approvals
+      const { data: approvals } = await supabase.from('maintenance_approvals').select('*, users(full_name)').eq('maintenance_id', m.id).order('approved_at', { ascending: true });
+
+      // Get machine manager/operator
+      let managerName = 'N/A', operatorName = 'N/A';
+      if (m.machines?.manager_id) {
+        const { data: mgr } = await supabase.from('users').select('full_name').eq('id', m.machines.manager_id).single();
+        managerName = mgr?.full_name || 'N/A';
+      }
+      if (m.machines?.operator_id) {
+        const { data: op } = await supabase.from('users').select('full_name').eq('id', m.machines.operator_id).single();
+        operatorName = op?.full_name || 'N/A';
+      }
+
+      // Determine status
+      const hasDone = (approvals || []).some(a => a.type === 'done');
+      const hasWorking = (approvals || []).some(a => a.type === 'working');
+      let statusLabel = 'Scheduled';
+      let statusColor = 'background:#F5F3FF; color:#5B21B6;';
+      if (hasDone) { statusLabel = 'Completed'; statusColor = 'background:#F0FDF4; color:#166534;'; }
+      else if (hasWorking) { statusLabel = 'In Progress'; statusColor = 'background:#FFFBEB; color:#92400E;'; }
+
+      // Approval history
+      let approvalRows = '';
+      if (approvals && approvals.length > 0) {
+        approvals.forEach(a => {
+          const typeLabel = a.type === 'done' ? 'Completed' : 'Working on it';
+          approvalRows += `<tr><td style="padding:8px 12px; border:1px solid #ddd;">${a.users?.full_name || 'N/A'}</td><td style="padding:8px 12px; border:1px solid #ddd;">${typeLabel}</td><td style="padding:8px 12px; border:1px solid #ddd;">${new Date(a.approved_at).toLocaleString()}</td><td style="padding:8px 12px; border:1px solid #ddd;">${a.remarks || '-'}</td></tr>`;
+        });
+      } else {
+        approvalRows = '<tr><td colspan="4" style="padding:12px; text-align:center; color:#666; border:1px solid #ddd;">No work records yet</td></tr>';
+      }
+
+      return `<div class="a4-report-card" id="${reportId}">
+        <div class="a4-report-header">
+          <div class="a4-report-logo">🔧</div>
+          <div class="a4-report-title">MAINTENANCE REPORT</div>
+          <div class="a4-report-subtitle">Computerized Maintenance Management System</div>
+        </div>
+        <div class="a4-report-meta">
+          <div><strong>Report #:</strong> ${num} of ${total}</div>
+          <div><strong>Generated:</strong> ${new Date().toLocaleString()}</div>
+          <div><strong>Generated By:</strong> ${currentUser.full_name || currentUser.username}</div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Event Information</div>
+          <div class="a4-grid-2">
+            <div class="a4-field"><div class="a4-label">Machine Name</div><div class="a4-value">${m.machines?.name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Scheduled Date</div><div class="a4-value">${m.date} at ${m.time}</div></div>
+            <div class="a4-field"><div class="a4-label">Machine Manager</div><div class="a4-value">${managerName}</div></div>
+            <div class="a4-field"><div class="a4-label">Machine Operator</div><div class="a4-value">${operatorName}</div></div>
+            <div class="a4-field"><div class="a4-label">Created By</div><div class="a4-value">${m.users?.full_name || 'N/A'}</div></div>
+            <div class="a4-field"><div class="a4-label">Current Status</div><div class="a4-value"><span style="display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; ${statusColor}">${statusLabel}</span></div></div>
+          </div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Maintenance Details</div>
+          <div class="a4-grid-2">
+            <div class="a4-field"><div class="a4-label">Departments Involved</div><div class="a4-value">${deptNames}</div></div>
+            <div class="a4-field"><div class="a4-label">Date Range</div><div class="a4-value">${dateFrom || 'All'} to ${dateTo || 'All'}</div></div>
+          </div>
+          <div class="a4-field" style="margin-top:12px;"><div class="a4-label">Description</div><div class="a4-value" style="white-space:pre-wrap; line-height:1.6;">${m.description || 'No description provided.'}</div></div>
+        </div>
+        <div class="a4-report-section">
+          <div class="a4-section-title">Work History (${(approvals || []).length} records)</div>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;">
+            <thead><tr style="background:#f5f5f5;"><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">User</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Action</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Date</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Remarks</th></tr></thead>
+            <tbody>${approvalRows}</tbody>
+          </table>
+        </div>
+        <div class="a4-report-footer">
+          <div>This report was generated by the CMMS Dashboard system.</div>
+          <div>© ${new Date().getFullYear()} — All rights reserved.</div>
+        </div>
+      </div>
+      <div class="no-print" style="display:flex; gap:12px; justify-content:center; margin-bottom:40px;">
+        <button class="btn btn-primary" onclick="printReport('${reportId}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print / Save PDF
+        </button>
+      </div>`;
+    }
+
+    function printReport(reportId) {
+      const el = document.getElementById(reportId);
+      if (!el) return;
+      const original = document.body.innerHTML;
+      document.body.innerHTML = el.outerHTML;
       window.print();
-    }
-
-    async function viewReport(id) {
-      const { data: r } = await supabase.from('reports').select('*').eq('id', id).single();
-      if (!r) return;
-      document.getElementById('report-date-from').value = r.filters?.from || '';
-      document.getElementById('report-date-to').value = r.filters?.to || '';
-      document.getElementById('report-machine').value = r.filters?.machineId || '';
-      document.getElementById('report-status').value = r.filters?.status || '';
-      generateReport();
-      window.scrollTo(0, document.getElementById('printable-report').offsetTop);
-    }
-
-    async function deleteReport(id) {
-      if (!confirm('Delete this report?')) return;
-      const { error } = await supabase.from('reports').delete().eq('id', id);
-      if (error) { showToast(error.message, 'error'); return; }
-      showToast('Report deleted', 'success');
-      loadReports();
+      document.body.innerHTML = original;
+      location.reload();
     }
 
     async function loadSettings() {
