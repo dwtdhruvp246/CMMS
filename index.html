@@ -1562,7 +1562,7 @@
         if (!maintenance || maintenance.length === 0) {
           mList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No upcoming maintenance for your machines.</p></div>';
         } else {
-          mList.innerHTML = maintenance.map(m => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;">${m.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${m.date} at ${m.time}</div></div><div class="badge badge-scheduled">${m.status}</div></div>`).join('');
+          mList.innerHTML = maintenance.map(m => `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="viewMaintenance('${m.id}')"><div><div style="font-weight:600;">${m.machines?.name || 'Unknown'}</div><div style="font-size:12px; color:var(--text-muted);">${m.date} at ${m.time}</div></div><div class="badge badge-scheduled">${m.status}</div></div>`).join('');
         }
       } else {
         document.getElementById('my-breakdowns-list').innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>No machines assigned.</p></div>';
