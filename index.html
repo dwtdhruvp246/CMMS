@@ -1367,27 +1367,10 @@
             <input type="file" id="upload-machinery" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleUpload('machinery', this)">
           </div>
         </div>
-        <div class="card">
-          <div class="card-body">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Machine Name</th>
-                    <th>Description</th>
-                    <th>Manager</th>
-                    <th>Operator</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="machines-table-body"></tbody>
-              </table>
-            </div>
-            <div id="machines-empty" class="empty-state hidden">
-              <div class="empty-state-icon">🏭</div>
-              <p>No machines registered yet.</p>
-            </div>
-          </div>
+        <div id="machines-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px;"></div>
+        <div id="machines-empty" class="empty-state hidden">
+          <div class="empty-state-icon">🏭</div>
+          <p>No machines registered yet.</p>
         </div>
       </div>
 
@@ -2192,17 +2175,81 @@
 
     async function loadMachinery() {
       const { data: machines } = await supabase.from('machines').select('*, manager:manager_id(full_name), operator:operator_id(full_name)').order('name');
-      const tbody = document.getElementById('machines-table-body');
+      const grid = document.getElementById('machines-grid');
       const empty = document.getElementById('machines-empty');
-      const table = tbody.closest('.table-container');
       if (!machines || machines.length === 0) {
-        table.classList.add('hidden');
+        grid.classList.add('hidden');
         empty.classList.remove('hidden');
       } else {
-        table.classList.remove('hidden');
+        grid.classList.remove('hidden');
         empty.classList.add('hidden');
-        tbody.innerHTML = machines.map(m => `<tr><td style="font-weight:600;">${m.name}</td><td>${m.description || '-'}</td><td>${m.manager?.full_name || 'N/A'}</td><td>${m.operator?.full_name || 'N/A'}</td><td>${canEdit('machinery') ? `<button class="btn btn-soft btn-xs" onclick="editMachine('${m.id}')">Edit</button>` : ''}${canDelete('machinery') ? `<button class="btn btn-danger btn-xs" onclick="deleteMachine('${m.id}')">Delete</button>` : ''}</td></tr>`).join('');
+        grid.innerHTML = machines.map(m => `
+          <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:24px;">
+              <div style="font-size:18px; font-weight:700; color:var(--text-primary); margin-bottom:8px; letter-spacing:-0.3px;">${m.name}</div>
+              <div style="font-size:14px; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">${m.description || 'No description'}</div>
+              <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:4px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; min-width:110px;">Machine Manager</span>
+                  <span style="font-size:14px; font-weight:600; color:var(--text-primary);">${m.manager?.full_name || 'Not assigned'}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; min-width:110px;">Machine Operator</span>
+                  <span style="font-size:14px; font-weight:600; color:var(--text-primary);">${m.operator?.full_name || 'Not assigned'}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border-top:1px solid var(--border);">
+              <button class="btn btn-soft" style="border-radius:0; border:none; border-right:1px solid var(--border); padding:14px; font-size:13px;" onclick="viewMachine('${m.id}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                View
+              </button>
+              <button class="btn btn-soft" style="border-radius:0; border:none; border-right:1px solid var(--border); padding:14px; font-size:13px;" onclick="manageMachineManager('${m.id}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Manage Machine Manager
+              </button>
+              <button class="btn btn-soft" style="border-radius:0; border:none; padding:14px; font-size:13px;" onclick="manageMachineOperator('${m.id}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                Manage Operator
+              </button>
+            </div>
+          </div>
+        `).join('');
       }
+    }
+
+    async function viewMachine(id) {
+      const { data: m } = await supabase.from('machines').select('*, manager:manager_id(full_name), operator:operator_id(full_name)').eq('id', id).single();
+      if (!m) return;
+      const html = `<div style="margin-bottom:16px;"><div style="font-size:20px; font-weight:700; margin-bottom:8px;">${m.name}</div><div style="font-size:14px; color:var(--text-muted); margin-bottom:16px;">${m.description || 'No description'}</div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"><div style="background:var(--bg-ivory); padding:12px; border-radius:var(--radius-sm);"><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Machine Manager</div><div style="font-weight:600;">${m.manager?.full_name || 'Not assigned'}</div></div><div style="background:var(--bg-ivory); padding:12px; border-radius:var(--radius-sm);"><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Machine Operator</div><div style="font-weight:600;">${m.operator?.full_name || 'Not assigned'}</div></div></div></div>`;
+      openModal('Machine Details', html, () => {});
+      document.getElementById('modal-footer').classList.add('hidden');
+    }
+
+    async function manageMachineManager(id) {
+      const { data: m } = await supabase.from('machines').select('*, manager:manager_id(full_name)').eq('id', id).single();
+      if (!m) return;
+      const userOpts = await getUserOptions(m.manager_id);
+      const html = `<div class="form-group"><label class="form-label">Assign Machine Manager</label><select class="form-select" id="mm-manager"><option value="">None</option>${userOpts}</select></div><p style="font-size:13px; color:var(--text-muted); margin-top:8px;">Current: <strong>${m.manager?.full_name || 'Not assigned'}</strong></p>`;
+      openModal('Manage Machine Manager', html, async () => {
+        const { error } = await supabase.from('machines').update({ manager_id: document.getElementById('mm-manager').value || null }).eq('id', id);
+        if (error) { showToast(error.message, 'error'); return; }
+        showToast('Machine manager updated', 'success');
+        loadMachinery();
+      });
+    }
+
+    async function manageMachineOperator(id) {
+      const { data: m } = await supabase.from('machines').select('*, operator:operator_id(full_name)').eq('id', id).single();
+      if (!m) return;
+      const userOpts = await getUserOptions(null, m.operator_id);
+      const html = `<div class="form-group"><label class="form-label">Assign Machine Operator</label><select class="form-select" id="mm-operator"><option value="">None</option>${userOpts}</select></div><p style="font-size:13px; color:var(--text-muted); margin-top:8px;">Current: <strong>${m.operator?.full_name || 'Not assigned'}</strong></p>`;
+      openModal('Manage Machine Operator', html, async () => {
+        const { error } = await supabase.from('machines').update({ operator_id: document.getElementById('mm-operator').value || null }).eq('id', id);
+        if (error) { showToast(error.message, 'error'); return; }
+        showToast('Machine operator updated', 'success');
+        loadMachinery();
+      });
     }
 
     async function openAddMachineModal() {
