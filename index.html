@@ -839,27 +839,34 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      line-height: 1.5;
+      line-height: 1.4;
     }
     .a4-report-header {
       text-align: center;
       border-bottom: 3px solid var(--accent);
-      padding-bottom: 24px;
-      margin-bottom: 24px;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
     }
     .a4-report-logo {
-      font-size: 36px;
-      margin-bottom: 8px;
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    .a4-report-logo img {
+      width: 160px;
+      height: 74px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
     }
     .a4-report-title {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 800;
       letter-spacing: 2px;
       color: #1A1A1A;
       text-transform: uppercase;
     }
     .a4-report-subtitle {
-      font-size: 16px;
+      font-size: 13px;
       color: #666;
       margin-top: 4px;
       font-weight: 500;
@@ -868,74 +875,94 @@
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
-      font-size: 12px;
+      gap: 6px;
+      font-size: 11px;
       color: #666;
-      margin-bottom: 24px;
-      padding: 12px 16px;
+      margin-bottom: 20px;
+      padding: 10px 14px;
       background: #FAFAFA;
       border-radius: 6px;
     }
     .a4-report-section {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .a4-section-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #1A1A1A;
       border-bottom: 2px solid var(--accent-light);
-      padding-bottom: 8px;
-      margin-bottom: 16px;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
     }
     .a4-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 10px;
     }
     .a4-field {
       background: #FAFAFA;
-      padding: 12px 16px;
+      padding: 10px 12px;
       border-radius: 6px;
       border: 1px solid #eee;
     }
     .a4-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: #888;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .a4-value {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
       color: #1A1A1A;
     }
     .a4-report-footer {
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       color: #999;
       border-top: 1px solid #eee;
-      padding-top: 16px;
-      margin-top: 32px;
+      padding-top: 14px;
+      margin-top: 24px;
+    }
+    .a4-report-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 8px;
+    }
+    .a4-report-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      min-width: 500px;
+    }
+    .a4-report-table-wrap th,
+    .a4-report-table-wrap td {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .a4-report-table-wrap th {
+      background: #f5f5f5;
+      font-weight: 600;
     }
 
     @media print {
+      @page { margin: 0; }
       body * { visibility: hidden !important; }
       .a4-report-card, .a4-report-card * { visibility: visible !important; }
       .a4-report-card {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 20px 30px;
-        box-shadow: none;
-        border: none;
-        border-radius: 0;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 15px 20px !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
         page-break-after: always;
       }
       .a4-report-card:last-child {
@@ -944,9 +971,12 @@
       .no-print { display: none !important; }
     }
     @media (max-width: 640px) {
-      .a4-report-card { padding: 24px; }
+      .a4-report-card { padding: 16px; }
       .a4-grid-2 { grid-template-columns: 1fr; }
       .a4-report-meta { flex-direction: column; }
+      .a4-report-table-wrap table { font-size: 9px; min-width: 400px; }
+      .a4-report-table-wrap th,
+      .a4-report-table-wrap td { padding: 4px 6px; }
     }
 
     /* ============================================
@@ -1277,6 +1307,7 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#C9A96E">
 
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -2569,7 +2600,7 @@
         <div class="a4-report-header">
           <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:200px; height:92px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
           <div class="a4-report-title">BREAKDOWN REPORT</div>
-          <div class="a4-report-subtitle">${COMPANY_NAME} — Computerized Maintenance Management System</div>
+          <div class="a4-report-subtitle">${COMPANY_NAME}</div>
         </div>
         <div class="a4-report-meta">
           <div><strong>Report #:</strong> ${num} of ${total}</div>
@@ -2599,14 +2630,15 @@
         </div>
         <div class="a4-report-section">
           <div class="a4-section-title">Approval History (${(approvals || []).length} records)</div>
-          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;">
-            <thead><tr style="background:#f5f5f5;"><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">User</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Action</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Date</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Remarks</th></tr></thead>
-            <tbody>${approvalRows}</tbody>
-          </table>
+          <div class="a4-report-table-wrap">
+            <table>
+              <thead><tr><th>User</th><th>Action</th><th>Date</th><th>Remarks</th></tr></thead>
+              <tbody>${approvalRows}</tbody>
+            </table>
+          </div>
         </div>
         <div class="a4-report-footer">
-          <div>This report was generated by the CMMS Dashboard system.</div>
-          <div>© ${new Date().getFullYear()} — All rights reserved.</div>
+          <div>© ${new Date().getFullYear()} ${COMPANY_NAME} — All rights reserved.</div>
         </div>
       </div>
       <div class="no-print" style="display:flex; gap:12px; justify-content:center; margin-bottom:40px;">
@@ -2659,7 +2691,7 @@
         <div class="a4-report-header">
           <div class="a4-report-logo"><img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:200px; height:92px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';"></div>
           <div class="a4-report-title">MAINTENANCE REPORT</div>
-          <div class="a4-report-subtitle">${COMPANY_NAME} — Computerized Maintenance Management System</div>
+          <div class="a4-report-subtitle">${COMPANY_NAME}</div>
         </div>
         <div class="a4-report-meta">
           <div><strong>Report #:</strong> ${num} of ${total}</div>
@@ -2687,14 +2719,15 @@
         </div>
         <div class="a4-report-section">
           <div class="a4-section-title">Work History (${(approvals || []).length} records)</div>
-          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;">
-            <thead><tr style="background:#f5f5f5;"><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">User</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Action</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Date</th><th style="padding:8px 12px; border:1px solid #ddd; text-align:left; font-weight:600;">Remarks</th></tr></thead>
-            <tbody>${approvalRows}</tbody>
-          </table>
+          <div class="a4-report-table-wrap">
+            <table>
+              <thead><tr><th>User</th><th>Action</th><th>Date</th><th>Remarks</th></tr></thead>
+              <tbody>${approvalRows}</tbody>
+            </table>
+          </div>
         </div>
         <div class="a4-report-footer">
-          <div>This report was generated by the CMMS Dashboard system.</div>
-          <div>© ${new Date().getFullYear()} — All rights reserved.</div>
+          <div>© ${new Date().getFullYear()} ${COMPANY_NAME} — All rights reserved.</div>
         </div>
       </div>
       <div class="no-print" style="display:flex; gap:12px; justify-content:center; margin-bottom:40px;">
@@ -2708,11 +2741,48 @@
     function printReport(reportId) {
       const el = document.getElementById(reportId);
       if (!el) return;
-      const original = document.body.innerHTML;
-      document.body.innerHTML = el.outerHTML;
-      window.print();
-      document.body.innerHTML = original;
-      location.reload();
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast('Please allow popups to print or save PDF', 'error');
+        return;
+      }
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(s => s.outerHTML).join('');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Report</title>
+            ${styles}
+            <style>
+              @page { margin: 0; }
+              body { background: white; margin: 0; padding: 0; }
+              .a4-report-card {
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 15px 20px;
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                page-break-after: always;
+              }
+              .a4-report-card:last-child { page-break-after: auto; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${el.outerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 400);
     }
 
     async function loadSettings() {
