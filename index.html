@@ -1570,8 +1570,10 @@
       updateInternetStatus();
       window.addEventListener('online', updateInternetStatus);
       window.addEventListener('offline', updateInternetStatus);
+      renderCompanyBranding();
       const { data: { session } } = await supabase.auth.getSession();
       if (session) { await loadUserData(); } else { showLoginPage(); }
+      renderCompanyBranding();
     });
 
     function updateInternetStatus() {
@@ -1635,31 +1637,6 @@
       currentPermissions = {};
       showLoginPage();
       showToast('Signed out successfully', 'info');
-    }
-
-    function showLoginPage() {
-      document.getElementById('login-page').classList.remove('hidden');
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('login-username').value = '';
-      document.getElementById('login-password').value = '';
-    }
-
-    function showApp() {
-      document.getElementById('login-page').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      document.getElementById('user-name').textContent = currentUser.full_name || currentUser.username;
-      document.getElementById('user-role').textContent = currentUser.roles?.name || 'User';
-      document.getElementById('user-avatar').textContent = (currentUser.full_name || currentUser.username || 'U').charAt(0).toUpperCase();
-      document.getElementById('dash-username').textContent = currentUser.full_name || currentUser.username;
-      renderCompanyBranding();
-      renderSidebar();
-      let landing = currentUser.roles?.landing_page || 'dashboard';
-      // Safety: if landing page doesn't exist in MODULES or user can't view it, fall back to dashboard
-      const landingModule = MODULES[landing];
-      if (!landingModule || !canView(landingModule)) {
-        landing = 'dashboard';
-      }
-      navigateTo(landing);
     }
 
     function renderCompanyBranding() {
@@ -1733,7 +1710,34 @@
       }
     }
 
-    function renderSidebar() {
+   
+    function showLoginPage() {
+      document.getElementById('login-page').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      renderCompanyBranding();
+    }
+
+    function showApp() {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('user-name').textContent = currentUser.full_name || currentUser.username;
+      document.getElementById('user-role').textContent = currentUser.roles?.name || 'User';
+      document.getElementById('user-avatar').textContent = (currentUser.full_name || currentUser.username || 'U').charAt(0).toUpperCase();
+      document.getElementById('dash-username').textContent = currentUser.full_name || currentUser.username;
+      renderCompanyBranding();
+      renderSidebar();
+      let landing = currentUser.roles?.landing_page || 'dashboard';
+      // Safety: if landing page doesn't exist in MODULES or user can't view it, fall back to dashboard
+      const landingModule = MODULES[landing];
+      if (!landingModule || !canView(landingModule)) {
+        landing = 'dashboard';
+      }
+      navigateTo(landing);
+    }
+
+     function renderSidebar() {
       const nav = document.getElementById('nav-list');
       nav.innerHTML = NAV_ITEMS.map(item => {
         if (!canView(item.module)) return '';
