@@ -427,6 +427,20 @@
       .app-header { flex-direction: column; gap: 12px; align-items: flex-start !important; }
       .notification-panel { width: calc(100vw - 32px); right: -8px; }
       .modal-container { max-width: 95vw; padding: 24px; }
+      .reports-filter { grid-template-columns: 1fr !important; }
+      .reports-filter button { width: 100%; margin-top: 8px; }
+      .tabs { flex-wrap: wrap; }
+      .tab-btn { font-size: 12px; padding: 8px 12px; }
+      #sched-maint-grid { grid-template-columns: 1fr; }
+      .calendar-grid { gap: 3px; }
+      .calendar-day { font-size: 12px; }
+      .list-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .list-item > div:last-child { align-self: flex-end; }
+      .user-card { flex-direction: column; text-align: center; }
+      .user-avatar { margin: 0 auto; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .bento-card { padding: 16px; }
+      .card-value { font-size: 24px; }
     }
     .data-table {
       width: 100%;
@@ -965,6 +979,10 @@
     .sidebar-overlay.active { display: block; }
     @media (max-width: 1024px) {
       .bento-grid { grid-template-columns: repeat(2, 1fr); }
+      .reports-filter { grid-template-columns: 1fr 1fr; }
+      .reports-filter button { grid-column: span 2; }
+      .grid-2 { grid-template-columns: 1fr; }
+      #sched-maint-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 768px) {
       .mobile-toggle { display: flex; }
@@ -1308,7 +1326,7 @@
       </div>
 
       <div id="page-dashboard" class="page">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Dashboard</div>
             <div class="page-subtitle">Overview of your maintenance operations</div>
@@ -1359,7 +1377,7 @@
       </div>
 
       <div id="page-my-machines" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">My Machines</div>
             <div class="page-subtitle">Machines assigned to you</div>
@@ -1386,7 +1404,7 @@
       </div>
 
       <div id="page-breakdowns" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Breakdowns</div>
             <div class="page-subtitle">Manage all reported breakdowns</div>
@@ -1423,7 +1441,7 @@
       </div>
 
       <div id="page-scheduled-maintenance" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Scheduled Maintenance</div>
             <div class="page-subtitle">Plan and track maintenance schedules</div>
@@ -1432,7 +1450,7 @@
             <span>➕</span> Add Maintenance
           </button>
         </div>
-        <div class="grid-2 mb-6">
+        <div class="grid-2 mb-6" id="sched-maint-grid">
           <div class="card">
             <div class="card-body">
               <div class="calendar-header">
@@ -1455,7 +1473,7 @@
       </div>
 
       <div id="page-machinery" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Machinery</div>
             <div class="page-subtitle">Manage all machines and assignments</div>
@@ -1481,7 +1499,7 @@
       </div>
 
       <div id="page-reports" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Reports</div>
             <div class="page-subtitle">Generate detailed event reports</div>
@@ -1490,7 +1508,7 @@
 
         <!-- FILTER PANEL -->
         <div class="card" style="padding: 28px; margin-bottom: 24px;">
-          <div style="display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 16px; align-items: end;">
+          <div class="reports-filter" style="display: grid; grid-template-columns: 2fr 2fr 1fr 1fr auto; gap: 16px; align-items: end;">
             <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">Machine</label>
               <select class="form-select" id="report-machine">
@@ -1531,7 +1549,7 @@
       </div>
 
       <div id="page-settings" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Settings</div>
             <div class="page-subtitle">Manage system configuration</div>
@@ -1617,7 +1635,7 @@
       </div>
 
       <div id="page-users-permissions" class="page hidden">
-        <div class="page-header">
+        <div class="page-header" style="flex-wrap:wrap; gap:12px;">
           <div>
             <div class="page-title">Users & Permissions</div>
             <div class="page-subtitle">Manage users and role-based access</div>
