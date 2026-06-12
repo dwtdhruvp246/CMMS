@@ -956,8 +956,8 @@
       display: block;
     }
     .login-header .logo-icon img {
-      width: 52px;
-      height: 52px;
+      width: 104px;
+      height: 104px;
       object-fit: contain;
       display: block;
     }
@@ -1648,7 +1648,7 @@
       // Login page logo
       const loginLogo = document.querySelector('.login-header .logo-icon');
       if (loginLogo) {
-        loginLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:52px; height:52px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';">`;
+        loginLogo.innerHTML = `<img src="${COMPANY_LOGO}" alt="${COMPANY_NAME}" style="width:104px; height:104px; object-fit:contain;" onerror="this.style.display='none'; this.parentElement.textContent='🔧';">`;
         loginLogo.style.background = 'transparent';
         loginLogo.style.boxShadow = 'none';
       }
